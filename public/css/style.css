@@ -8,7 +8,7 @@
 body,
 html {
     padding: 0 30px 0 30px;
-    overflow-x: hidden;
+    overflow: hidden;
     font-family: "Poppins", serif;
     font-style: normal;
 }
@@ -55,9 +55,6 @@ header .container p {
 
     header .container img {
         height: 150px;
-        width: auto;
-        position: relative;
-        display: inline-block;
     }
 
     header .container h1 {
@@ -65,8 +62,6 @@ header .container p {
     }
 
     header .container p {
-        margin-top: -10px;
-        font-weight: 500;
         font-size: 15px;
     }
 }
@@ -79,9 +74,6 @@ header .container p {
 
     header .container img {
         height: 250px;
-        width: auto;
-        position: relative;
-        display: inline-block;
     }
 
     header .container h1 {
@@ -89,8 +81,6 @@ header .container p {
     }
 
     header .container p {
-        margin-top: -10px;
-        font-weight: 500;
         font-size: 25px;
     }
 }

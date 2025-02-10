@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const helper = require('../helper/helper');
 const errors = require('../../data/error.json');
+const helmet = require('helmet');
 
 const originList = process.env.ALLOWED_ORIGIN.split(',');
 const serverID = process.env.SERVER_ID;
@@ -12,6 +13,7 @@ const publicFolder = path.join(__dirname, "../../public");
 
 const app = express();
 
+app.use(helmet());
 app.use(cors({
     origin: function (origin, callback) {
         if (!origin || originList.includes(origin)) {
