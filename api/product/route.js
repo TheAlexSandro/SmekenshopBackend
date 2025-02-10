@@ -30,6 +30,7 @@ app.post('/product/upload', upload.any(), (req, res) => {
         db.getUserData(seller_id, async (result, err) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             if (!result) return helper.response(res, 400, false, errors[404]['404.upload_cancel'].message, errors[404]['404.upload_cancel'].code);
+            if (product_id && result.products.indexOf(product_id) == -1) return helper.response(res, 400, false, errors[404]['404.user_product'].message, errors[404]['404.user_product'].code);
 
             const uploadPromises = req.files.map(file =>
                 new Promise((resolve, reject) => {
