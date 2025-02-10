@@ -30,7 +30,6 @@ app.post('/product/upload', upload.any(), (req, res) => {
         db.getUserData(seller_id, async (result, err) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             if (!result) return helper.response(res, 400, false, errors[404]['404.upload_cancel'].message, errors[404]['404.upload_cancel'].code);
-            if (result.products.indexOf(product_id) == -1) return helper.response(res, 400, false, errors[404]['404.user_product'].message, errors[404]['404.user_product'].code);
 
             const uploadPromises = req.files.map(file =>
                 new Promise((resolve, reject) => {
@@ -111,6 +110,7 @@ app.post('/product/update', (req, res) => {
     db.getUserData(seller_id, (result, err) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!result) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
+        if (result.products.indexOf(product_id) == -1) return helper.response(res, 400, false, errors[404]['404.user_product'].message, errors[404]['404.user_product'].code);
 
         if (field != 'products') {
             db.updateProduct(product_id, action, new_value, field, (rest, err) => {
@@ -162,6 +162,7 @@ app.post('/product/remove', (req, res) => {
     db.getUserData(seller_id, (result, err) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!result) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
+        if (result.products.indexOf(product_id) == -1) return helper.response(res, 400, false, errors[404]['404.user_product'].message, errors[404]['404.user_product'].code);
 
         db.getProduct(product_id, (rest, err) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
