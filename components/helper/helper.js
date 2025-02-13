@@ -75,6 +75,16 @@ const cleanJSON = (data) => {
     return cleared;
 }
 
+const getDate = () => {
+    var date = new Date();
+    var day = String(date.getDate()).padStart(2, "0");
+    var month = String(date.getMonth() + 1).padStart(2, "0");
+    var year = String(date.getFullYear()).slice(2);
+
+    var formattedDate = `${day}/${month}/${year}`;
+    return formattedDate;
+}
+
 const helper = {
     response,
     detectParam,
@@ -83,6 +93,7 @@ const helper = {
     generateKey,
     decodeKey,
     verifyServerID,
-    cleanJSON
+    cleanJSON,
+    getDate
 };
 module.exports = helper;

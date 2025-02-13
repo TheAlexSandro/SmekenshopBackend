@@ -174,7 +174,11 @@ const productsSchema = new Schema({
     description: String,
     price: String,
     category: String,
-    products: [productSchema],
+    images: [productSchema],
+    like: Number,
+    view: Number,
+    interaction: Number,
+    release_date: String,
     seller: {
         seller_id: String
     }
@@ -182,13 +186,13 @@ const productsSchema = new Schema({
 
 const Product = mongoose.model('Product', productsSchema);
 
-const addProduct = (product_name, description, price, category, products, seller_id, seller_name, seller_rating, callback) => {
+const addProduct = (product_name, description, price, category, images, seller_id, seller_name, seller_rating, callback) => {
     const prices = price.includes(',') ? price.replace(/,/g, '.') : price;
     const rating = String(seller_rating).includes(',') ? seller_rating.replace(/,/g, '.') : seller_rating;
     const product_id = helper.createID(10);
     const seller = { seller_id, seller_name, seller_rating: rating };
 
-    var fileData = new Product({ product_id, product_name, description, price: prices, category, products, seller });
+    var fileData = new Product({ product_id, product_name, description, price: prices, category, images, like: 0, view: 0, release_date: helper.getDate(), seller });
     const datas = {
         product_id,
         product_name,

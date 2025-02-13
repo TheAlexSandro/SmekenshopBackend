@@ -6,7 +6,7 @@ const db = require('../../components/database/db');
 const multer = require('multer');
 
 const storage = multer.memoryStorage()
-const upload = multer({ storage: storage })
+const upload = multer({ storage })
 
 app.post('/product/upload', upload.any(), (req, res) => {
     const { server_id, name, description, category, price, seller_id, action, product_id, old_file_id } = req.body;
