@@ -43,7 +43,7 @@ app.post('/product/upload', upload.any(), (req, res) => {
             var results = await Promise.all(uploadPromises);
 
             if (!action) {
-                db.addProduct(name, description, price, category, results, seller_id, result.name, result.rating, (rest, err) => {
+                db.addProduct(name, description, price, category, results, seller_id, (rest, err) => {
                     if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                     if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
 
@@ -51,7 +51,7 @@ app.post('/product/upload', upload.any(), (req, res) => {
                         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                         if (!rr) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
 
-                        return helper.response(res, 200, true, 'Berhasil!', null, { product_id: rest.product_id });
+                        return helper.response(res, 200, true, 'Berhasil!', null, rest);
                     })
                 });
             } else if (action == 'add') {
@@ -125,7 +125,7 @@ app.post('/product/update', (req, res) => {
             if (old_file_id.includes('[')) {
                 const oldFileID = String(old_file_id).replace(/\[/g, '').replace(/\]/g, '').split(',');
 
-                const fileMap = oldFileID.map((file, i) => {
+                oldFileID.map((file, i) => {
                     return new Promise((resolve, reject) => {
                         db.removeFromDrive(file, (rests, err) => {
                             if (err) return reject(err);
@@ -169,18 +169,23 @@ app.post('/product/remove', (req, res) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             if (!rest) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
 
-            rest.products.map((rts) => {
-                db.removeFromDrive(rts.file_id, (rr, err) => {
+            const removePromises = rest.images.map(rts => {
+                return new Promise((resolve, reject) => {
+                    db.removeFromDrive(rts.file_id, (rr, err) => {
+                        if (err) return reject(err);
+                        resolve(rr);
+                    });
+                });
+            });            
+
+            Promise.all(removePromises).then(() => {
+                db.removeProduct(seller_id, product_id, (rest, err) => {
                     if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+                    if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
+    
+                    return helper.response(res, 200, true, 'Produk dihapus!');
                 })
-            })
-
-            db.removeProduct(seller_id, product_id, (rest, err) => {
-                if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
-                if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
-
-                return helper.response(res, 200, true, 'Produk dihapus!');
-            })
+            }).catch(err => helper.response(res, 400, false, err, errors[400]['400.error'].code));
         })
     })
 })

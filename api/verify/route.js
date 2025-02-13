@@ -44,4 +44,23 @@ app.post('/product/verify', (req, res) => {
     })
 })
 
+app.post('/account/verify', (req, res) => {
+    const { account_id, email } = req.body;
+
+    if ((!account_id || account_id == '') && (!email || email == '')) return helper.response(res, 400, false, 'Membutuhkan nilai pada parameter account_id atau email.', errors[400]['400.error'].code);
+
+    if (account_id && account_id == '') return helper.response(res, 400, false, errors[400]['400.opt_param'].message.replace(`{PARAMETER}`, `account_id`), errors[400]['400.opt_param'].code);
+
+    if (email && email == '') return helper.response(res, 400, false, errors[400]['400.opt_param'].message.replace(`{PARAMETER}`, `email`), errors[400]['400.opt_param'].code);
+
+    const ident = email ? email : account_id;
+    db.getUserData(ident, (result, err) => {
+        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+        if (!result) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
+        const obj = JSON.stringify(result, (key, value) => (key === 'password' || key === 'login_type') ? undefined : value);
+        
+        return helper.response(res, 200, true, `Success!`, null, JSON.parse(obj));
+    })
+})
+
 module.exports = app;

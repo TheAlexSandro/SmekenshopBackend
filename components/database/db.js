@@ -186,21 +186,24 @@ const productsSchema = new Schema({
 
 const Product = mongoose.model('Product', productsSchema);
 
-const addProduct = (product_name, description, price, category, images, seller_id, seller_name, seller_rating, callback) => {
+const addProduct = (product_name, description, price, category, images, seller_id, callback) => {
     const prices = price.includes(',') ? price.replace(/,/g, '.') : price;
-    const rating = String(seller_rating).includes(',') ? seller_rating.replace(/,/g, '.') : seller_rating;
     const product_id = helper.createID(10);
-    const seller = { seller_id, seller_name, seller_rating: rating };
+    const dates = helper.getDate();
 
-    var fileData = new Product({ product_id, product_name, description, price: prices, category, images, like: 0, view: 0, release_date: helper.getDate(), seller });
+    var fileData = new Product({ product_id, product_name, description, price: prices, category, images, like: 0, view: 0, interaction: 0, release_date: dates, seller: { seller_id } });
     const datas = {
         product_id,
         product_name,
         description,
         price: prices,
         category,
-        products,
-        seller
+        images,
+        like: 0,
+        view: 0,
+        interaction: 0,
+        release_date: dates,
+        seller: { seller_id }
     }
     fileData.save().then(() => callback(datas)).catch(err => callback(null, err));
     return;
@@ -252,7 +255,7 @@ const updateProductArray = (product_id, action, remove = false, old_file_id, new
             if (!result) return callback(false);
             const filter = (action == 'update') ? { product_id: product_id, 'products.file_id': old_file_id } : { product_id }
             let updateQuery = {}
-        
+
             if (remove) {
                 updateQuery = { $pull: { products: { file_id: old_file_id } } };
             } else if (action == 'set') {
@@ -263,24 +266,31 @@ const updateProductArray = (product_id, action, remove = false, old_file_id, new
                     file_name,
                     link: links
                 }
-                updateQuery = { $push: { products: newProduct } }; 
+                updateQuery = { $push: { products: newProduct } };
             }
-        
+
             Product.updateOne(filter, updateQuery).then(() => callback(true)).catch(err => callback(err));
         })
 };
 
 const removeProduct = (seller_id, product_id, callback) => {
-    Product.findOne({ product_id }).then(result => {
-        if (!result) return callback(false);
+    Product.findOne({ product_id })
+        .then(result => {
+            if (!result) return callback(false);
 
-        Product.deleteMany({ product_id }).then(() => callback(true)).catch(err => callback(err));
-        User.updateOne({ id: seller_id }, { $pull: { products: product_id } }).then(() => callback(true)).catch(err => callback(err));
-    }).catch(err => {
-        console.log(err);
-        callback(null, err);
-    })
-}
+            Promise.all([
+                Product.deleteMany({ product_id }),
+                User.updateOne({ id: seller_id }, { $pull: { products: product_id } })
+            ])
+                .then(() => callback(true))
+                .catch(err => callback(err));
+        })
+        .catch(err => {
+            console.log(err);
+            callback(null, err);
+        });
+};
+
 
 const db = {
     addUser,

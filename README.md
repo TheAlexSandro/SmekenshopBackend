@@ -150,3 +150,13 @@ Required parameter:
 - product_id: ID unik pada setiap produk
 
 Mengembalikan hasil berupa informasi produk
+
+## Endpoint /account/verify (POST)
+Untuk mendapatkan informasi akun (tanpa JWT) - tidak boleh disimpan dalam cookie (security reason).
+
+Required parameter:
+<pre>account_id, email</pre>
+
+- teruntuk account_id dan email, silahkan pilih salah satu
+
+Mengembalikan informasi akun (tanpa password dan login_type).
