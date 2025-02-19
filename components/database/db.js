@@ -12,7 +12,9 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema({
     id: String,
     name: String,
-    rating: String,
+    instance: String,
+    whatsapp: String,
+    interactions: String,
     email: String,
     password: {
         type: String,
@@ -30,7 +32,8 @@ const userSchema = new Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-const addUser = (name, email, login_type, password, profile_photo, callback) => {
+const addUser = (name, instance = null, whatsapp = null, email, login_type, password, profile_photo, callback) => {
+    const profile = profile_photo ? profile_photo : null;
     User.findOne({ email }).then(result => {
         if (!result) {
             const id = helper.createID(5);
@@ -39,13 +42,13 @@ const addUser = (name, email, login_type, password, profile_photo, callback) => 
                 helper.pwd('enc', password, null, (r, err) => {
                     if (err) return callback(err);
                     var userData = new User({
-                        id, name, rating: 0, email, password: r, login_type, profile_photo: null, products: []
+                        id, name, instance, whatsapp, interactions: 0, email, password: r, login_type, profile_photo: profile, products: []
                     });
                     userData.save().then(() => callback(id)).catch(err => callback(null, err));
                 });
             } else {
                 var userData = new User({
-                    id, name, rating: 0, email, password: null, login_type, profile_photo, products: []
+                    id, name, instance, whatsapp, interactions: 0, email, password, login_type, profile_photo: profile, products: []
                 });
                 userData.save().then(() => callback(id)).catch(err => callback(null, err));
             }
@@ -75,14 +78,13 @@ const updateUserData = (identifier, action, value, field, callback) => {
         .then(result => {
             if (!result) return callback(false);
             const updateAction = {};
-            const values = (field == 'rating') ? value.replace(/,/g, '.') : value;
 
             if (action === 'set') {
-                updateAction.$set = { [field]: values };
+                updateAction.$set = { [field]: value };
             } else if (action === 'push') {
-                updateAction.$push = { [field]: values };
+                updateAction.$push = { [field]: value };
             } else if (action === 'pull') {
-                updateAction.$pull = { [field]: values };
+                updateAction.$pull = { [field]: value };
             } else if (action === 'unset') {
                 updateAction.$set = { [field]: null };
             }
@@ -116,14 +118,14 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 oAuth2Client.setCredentials({ refresh_token: process.env.REFRESH_TOKEN });
 
-const addToDrive = (fileObject, file_name, callback) => {
+const addToDrive = (fileObject, file_name, type, callback) => {
     const ids = helper.createID(20);
     const bufferStream = new stream.PassThrough();
     bufferStream.end(fileObject.buffer);
     const drive = google.drive({ version: 'v3', auth: oAuth2Client });
     drive.files.create({
         requestBody: {
-            name: (file_name) ? file_name : `media-${ids}`,
+            name: (file_name) ? file_name : `${type}-${ids}`,
         },
         media: {
             mimeType: fileObject.mimetype,
@@ -143,7 +145,7 @@ const addToDrive = (fileObject, file_name, callback) => {
             })
                 .then(() => {
                     const downloadLink = `https://drive.google.com/uc?id=${fileId}&export=download`;
-                    callback({ file_id: fileId, file_name: (file_name) ? file_name : `media-${ids}`, link: downloadLink }, null);
+                    callback({ file_id: fileId, file_name: (file_name) ? file_name : `${type}-${ids}`, link: downloadLink }, null);
                 });
         })
         .catch(err => {
@@ -253,23 +255,25 @@ const updateProductArray = (product_id, action, remove = false, old_file_id, new
     Product.findOne({ product_id })
         .then(result => {
             if (!result) return callback(false);
-            const filter = (action == 'update') ? { product_id: product_id, 'products.file_id': old_file_id } : { product_id }
+            const filter = (action == 'update') ? { product_id, 'images.file_id': old_file_id } : { product_id }
             let updateQuery = {}
 
             if (remove) {
-                updateQuery = { $pull: { products: { file_id: old_file_id } } };
-            } else if (action == 'set') {
-                updateQuery = { $set: { 'products.$.file_id': new_file_id, 'products.$.file_name': file_name, 'products.$.link': links } };
+                updateQuery = { $pull: { images: { file_id: old_file_id } } };
+            } else if (action == 'update') {
+                updateQuery = { $set: { 'images.$.file_id': new_file_id, 'images.$.file_name': file_name, 'images.$.link': links } };
             } else {
                 var newProduct = {
                     file_id: new_file_id,
                     file_name,
                     link: links
                 }
-                updateQuery = { $push: { products: newProduct } };
+                updateQuery = { $push: { images: newProduct } };
             }
 
             Product.updateOne(filter, updateQuery).then(() => callback(true)).catch(err => callback(err));
+        }).catch(err => {
+            callback(err);
         })
 };
 
@@ -280,7 +284,7 @@ const removeProduct = (seller_id, product_id, callback) => {
 
             Promise.all([
                 Product.deleteMany({ product_id }),
-                User.updateOne({ id: seller_id }, { $pull: { products: product_id } })
+                User.updateOne({ id: seller_id }, { $pull: { images: product_id } })
             ])
                 .then(() => callback(true))
                 .catch(err => callback(err));

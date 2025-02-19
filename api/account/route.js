@@ -1,10 +1,9 @@
-const app = require('../../components/api/init');
 const errors = require('../../data/error.json');
 const helper = require('../../components/helper/helper');
 const db = require('../../components/database/db');
-const multer = require('multer');
+const { file } = require('googleapis/build/src/apis/file');
 
-app.post('/account/update', (req, res) => {
+const updateAccount = (req, res) => {
     const { account_id, email, field, new_value, action, password } = req.body;
     if (!helper.detectParam(field, action)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `field, action`), errors[400]['400.parameter'].code);
 
@@ -22,6 +21,8 @@ app.post('/account/update', (req, res) => {
 
     if (field.includes('password') && (!password && password == '')) return helper.response(res, 400, false, 'Parameter password dibutuhkan jika menggunakan field ini dan harus memiliki nilai.', errors[400]['400.error'].code);
 
+    if (file.includes('profile_photo') && action != 'unset') return helper.response(res, 400, false, 'Anda hanya bisa menggunakan endpoint ini dengan aksi unset jika field adalah profile_photo', errors[400]['400.error'].code);
+
     const ident = (email) ? email : account_id;
     db.getUserData(ident, (result, err) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
@@ -31,13 +32,10 @@ app.post('/account/update', (req, res) => {
             const profLink = result.profile_photo;
             const match = profLink.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]+)/)[1];
 
-            console.log(match);
             db.removeFromDrive(match, (rrs, err) => {
                 if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             })
-        }
-
-        if (field == 'password') {
+        } else if (field == 'password') {
             helper.pwd('dec', password, result.password, (isValid, err) => {
                 if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                 if (!isValid) return helper.response(res, 401, false, errors[401]['401.password'].message, errors[401]['401.password'].code);
@@ -56,12 +54,9 @@ app.post('/account/update', (req, res) => {
             })
         }
     })
-})
+}
 
-const memo = multer.memoryStorage();
-const uploads = multer({ storage: memo })
-
-app.post('/account/update/profile', uploads.single('file'), (req, res) => {
+const updateProfile = (req, res) => {
     const { server_id, account_id, email } = req.body;
     if (!helper.detectParam(server_id)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `server_id, account_id`), errors[400]['400.parameter'].code);
 
@@ -82,7 +77,13 @@ app.post('/account/update/profile', uploads.single('file'), (req, res) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!result) return helper.response(res, 400, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
 
-        db.addToDrive(req.file, null, (rest, err) => {
+        const getProfile = result.profile_photo;
+        if (getProfile != null) {
+            const match = getProfile.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]+)/)[1];
+            db.removeFromDrive(match, (rest, err) => { });
+        }
+
+        db.addToDrive(req.file, null, 'profile', (rest, err) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             const links = rest.link;
 
@@ -93,6 +94,6 @@ app.post('/account/update/profile', uploads.single('file'), (req, res) => {
             })
         })
     })
-})
+}
 
-module.exports = app;
+module.exports = { updateAccount, updateProfile };

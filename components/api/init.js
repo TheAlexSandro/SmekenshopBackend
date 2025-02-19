@@ -33,7 +33,7 @@ app.use((err, req, res, next) => {
 });
 
 app.use((req, res, next) => {
-    if (req.method === 'GET') return res.sendFile(path.join(publicFolder, 'index.html'))
+    if (req.method === 'GET' && !req.path.startsWith('/auth/google/callback')) return res.sendFile(path.join(publicFolder, 'index.html'))
     next();
 });
 

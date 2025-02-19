@@ -130,7 +130,7 @@ Require parameter:
 - seller_id: ID unik pada setiap akun
 - product_id: ID unik pada setiap produk
 
-## Endpoint /auth/verify (POST)
+## Endpoint /verify/auth (POST)
 Digunakan untuk mendapatkan informasi lengkap akun, membutuhkan JWT
 
 Required parameter:
@@ -140,7 +140,7 @@ Required parameter:
 
 Mengembalikan hasil berupa informasi akun
 
-## Endpoint /product/verify (POST)
+## Endpoint /verify/product (POST)
 Untuk mendapatkan informasi produk
 
 Required parameter:
@@ -151,7 +151,7 @@ Required parameter:
 
 Mengembalikan hasil berupa informasi produk
 
-## Endpoint /account/verify (POST)
+## Endpoint /verify/account (POST)
 Untuk mendapatkan informasi akun (tanpa JWT) - tidak boleh disimpan dalam cookie (security reason).
 
 Required parameter:

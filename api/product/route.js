@@ -1,18 +1,15 @@
 require('dotenv').config({ path: '.env' });
-const app = require('../auth/google/route');
 const errors = require('../../data/error.json');
 const helper = require('../../components/helper/helper');
 const db = require('../../components/database/db');
-const multer = require('multer');
 
-const storage = multer.memoryStorage()
-const upload = multer({ storage })
-
-app.post('/product/upload', upload.any(), (req, res) => {
+const productUpload = (req, res) => {
     const { server_id, name, description, category, price, seller_id, action, product_id, old_file_id } = req.body;
-    if (!helper.detectParam(server_id, name, description, category, price, seller_id)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `server_id, name, description, category, price, seller_id`), errors[400]['400.parameter'].code);
+    if (!helper.detectParam(server_id, seller_id)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `server_id, seller_id`), errors[400]['400.parameter'].code);
 
     if (server_id != process.env.SERVER_ID) return helper.response(res, 403, false, errors[403]['403.access'].message, errors[403]['403.access'].code);
+
+    if ((!action || (action && action == '')) && !helper.detectParam(name, description, category, price)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `server_id, name, description, category, price`), errors[400]['400.parameter'].code);
 
     if (!req.files || req.files.length === 0) {
         return helper.response(res, 400, false, errors[400]['400.missing_file'].message, errors[400]['400.missing_file'].code);
@@ -34,7 +31,7 @@ app.post('/product/upload', upload.any(), (req, res) => {
 
             const uploadPromises = req.files.map(file =>
                 new Promise((resolve, reject) => {
-                    db.addToDrive(file, null, (driveResult, err) => {
+                    db.addToDrive(file, null, 'product', (driveResult, err) => {
                         if (err) return reject(err);
                         resolve(driveResult);
                     });
@@ -69,21 +66,27 @@ app.post('/product/upload', upload.any(), (req, res) => {
 
                     oldFileID.map((file, i) => {
                         return new Promise((resolve, reject) => {
-                            db.updateProductArray(product_id, 'update', false, file, results[i].file_id, results[i].file_name, results[i].link, (rest, err) => {
-                                if (err) return reject(err);
-                                if (!rest) return reject(rest);
-                                resolve(rest);
-                            });
+                            db.removeFromDrive(file, (rer, err) => {
+                                db.updateProductArray(product_id, 'update', false, file, results[i].file_id, results[i].file_name, results[i].link, (rest, err) => {
+                                    if (err) return reject(err);
+                                    if (!rest) return reject(rest);
+                                    resolve(rest);
+                                });
+                            })
                         });
                     });
 
                     return helper.response(res, 200, true, 'Berhasil!', null, { product_id });
                 } else {
-                    db.updateProductArray(product_id, 'update', false, old_file_id, results[0].file_id, results[0].file_name, results[0].link, (rest, err) => {
-                        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
-                        if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
-                        
-                        return helper.response(res, 200, true, 'Berhasil!', null, { product_id });
+                    db.removeFromDrive(old_file_id, (rer, err) => {
+                        console.log(rer);
+                        db.updateProductArray(product_id, 'update', false, old_file_id, results[0].file_id, results[0].file_name, results[0].link, (rest, err) => {
+                            console.log(err);
+                            if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+                            if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
+                            
+                            return helper.response(res, 200, true, 'Berhasil!', null, { product_id });
+                        })
                     })
                 }
             }
@@ -92,9 +95,9 @@ app.post('/product/upload', upload.any(), (req, res) => {
         console.log(e);
         return helper.response(res, 400, false, e.message, errors[400]['400.error'].code);
     }
-})
+}
 
-app.post('/product/update', (req, res) => {
+const productUpdate = (req, res) => {
     const { seller_id, product_id, field, action, new_value, old_file_id } = req.body;
     if (!helper.detectParam(seller_id, product_id, field, action)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `seller_id, product_id, field, action`), errors[400]['400.parameter'].code);
 
@@ -122,7 +125,7 @@ app.post('/product/update', (req, res) => {
                 return helper.response(res, 200, true, 'Berhasil!', null, { product_id });
             })
         } else {
-            if (old_file_id.includes('[')) {
+            if (old_file_id.includes('[') && old_file_id.includes(']')) {
                 const oldFileID = String(old_file_id).replace(/\[/g, '').replace(/\]/g, '').split(',');
 
                 oldFileID.map((file, i) => {
@@ -130,7 +133,7 @@ app.post('/product/update', (req, res) => {
                         db.removeFromDrive(file, (rests, err) => {
                             if (err) return reject(err);
 
-                            db.updateProductArray(product_id, true, file, null, null, null, (rest, err) => {
+                            db.updateProductArray(product_id, 'pull', true, file, null, null, null, (rest, err) => {
                                 if (err) return reject(err);
                                 if (!rest) return reject(rest);
                                 resolve(rest);
@@ -144,7 +147,7 @@ app.post('/product/update', (req, res) => {
                 db.removeFromDrive(file, (rests, err) => {
                     if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
 
-                    db.updateProductArray(product_id, true, old_file_id, null, null, null, (rest, err) => {
+                    db.updateProductArray(product_id, 'pull', true, old_file_id, null, null, null, (rest, err) => {
                         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                         if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
 
@@ -154,9 +157,9 @@ app.post('/product/update', (req, res) => {
             }
         }
     })
-})
+}
 
-app.post('/product/remove', (req, res) => {
+const productRemove = (req, res) => {
     const { seller_id, product_id } = req.body;
     if (!helper.detectParam(seller_id, product_id)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `seller_id, product_id`), errors[400]['400.parameter'].code);
 
@@ -172,7 +175,6 @@ app.post('/product/remove', (req, res) => {
             const removePromises = rest.images.map(rts => {
                 return new Promise((resolve, reject) => {
                     db.removeFromDrive(rts.file_id, (rr, err) => {
-                        if (err) return reject(err);
                         resolve(rr);
                     });
                 });
@@ -188,6 +190,6 @@ app.post('/product/remove', (req, res) => {
             }).catch(err => helper.response(res, 400, false, err, errors[400]['400.error'].code));
         })
     })
-})
+}
 
-module.exports = app;
+module.exports = { productUpload, productUpdate, productRemove };

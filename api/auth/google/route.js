@@ -11,7 +11,7 @@ const data = {
     redirect_uris: process.env.GOOGLE_REDIRECT_URI
 };
 
-app.post('/auth/google/authorize', (req, res) => {
+const googleAuthorize = (req, res) => {
     const oAuth2Client = new google.auth.OAuth2(data.client_id, data.client_secret, data.redirect_uris);
 
     const request_id = helper.createID(150);
@@ -28,9 +28,9 @@ app.post('/auth/google/authorize', (req, res) => {
     });
 
     return helper.response(res, 200, true, `Berhasil!`, null, { url: authUrl });
-});
+}
 
-app.post('/auth/google/callback', async (req, res) => {
+const googleCallback = (req, res) => {
     try {
         const { code, state } = req.query;
         if (!helper.detectParam(code, state)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `code, state`), errors[400]['400.parameter'].code);
@@ -48,12 +48,14 @@ app.post('/auth/google/callback', async (req, res) => {
             if (err && err.status == 400) { return helper.response(res, 401, false, 'Kode telah dicabut.', errors[401]['401.error'].code); } else if (err && err.status != 400) { return helper.response(res, 401, false, 'Bad Request', errors[401]['401.error'].code); }
 
             return oAuth2Client.verifyIdToken({ idToken: result.id_token, audience: data.client_id }, (err, result) => {
+                console.log(`AUTH: ${err}`)
                 if (err) return helper.response(res, 401, false, 'Bad Request', errors[401]['401.error'].code);
                 const payload = result.getPayload()
                 const { email, name, picture } = payload;
 
-                db.addUser(name, email, 'google', null, picture, (rest, err) => {
-                    if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+                db.addUser(name, null, null, email, 'google', null, picture, (rest, err) => {
+                    console.log(`DB: ${err}`)
+                    if (err) return helper.response(res, 400, false, JSON.stringify(err), errors[400]['400.error'].code);
                     if (!rest) {
                         return db.getUserData(email, (rr, err) => {
                             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
@@ -71,6 +73,6 @@ app.post('/auth/google/callback', async (req, res) => {
         console.error(err);
         return helper.response(res, 401, false, 'Failed to login', errors[401]['401.error'].code);
     }
-});
+}
 
-module.exports = app;
+module.exports = { googleAuthorize, googleCallback };

@@ -1,14 +1,14 @@
 require('dotenv').config({ path: '.env' });
-const app = require('../product/route');
 const errors = require('../../data/error.json');
 const helper = require('../../components/helper/helper');
 const db = require('../../components/database/db');
 
-app.post('/auth/verify', (req, res) => {
+const verifyToken = (req, res) => {
     const { token } = req.body;
     if (!helper.detectParam(token)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `token`), errors[400]['400.parameter'].code);
 
     const hsl = helper.decodeKey(token);
+    console.log(hsl);
     if (hsl == false || hsl == 'expired') return helper.response(res, 401, false, errors[401]['401.jwt'].message, errors[401]['401.jwt'].code);
 
     return db.getUserData(hsl.id, (result, err) => {
@@ -17,9 +17,9 @@ app.post('/auth/verify', (req, res) => {
         
         return helper.response(res, 200, true, `Success!`, null, result);
     })
-})
+}
 
-app.post('/product/verify', (req, res) => {
+const verifyProduct = (req, res) => {
     const { product_id, seller_id, email } = req.body;
     if (!helper.detectParam(product_id)) return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `product_id, seller_id`), errors[400]['400.parameter'].code);
 
@@ -42,9 +42,9 @@ app.post('/product/verify', (req, res) => {
             return helper.response(res, 200, true, 'Berhasil!', null, rest);
         })
     })
-})
+}
 
-app.post('/account/verify', (req, res) => {
+const verifyAccount = (req, res) => {
     const { account_id, email } = req.body;
 
     if ((!account_id || account_id == '') && (!email || email == '')) return helper.response(res, 400, false, 'Membutuhkan nilai pada parameter account_id atau email.', errors[400]['400.error'].code);
@@ -61,6 +61,6 @@ app.post('/account/verify', (req, res) => {
         
         return helper.response(res, 200, true, `Success!`, null, JSON.parse(obj));
     })
-})
+}
 
-module.exports = app;
+module.exports = { verifyToken, verifyProduct, verifyAccount };
