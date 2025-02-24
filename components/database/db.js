@@ -221,6 +221,16 @@ const getProduct = (product_id, callback) => {
     });
 }
 
+const getAllProduct = (callback) => {
+    Product.find({}).select('-_id -__v').then(result => {
+        if (!result) return callback(false);
+        callback(result);
+    }).catch(err => {
+        console.log(err);
+        callback(null, err);
+    });
+}
+
 const updateProduct = (product_id, action, value, field, callback) => {
     Product.findOne({ product_id })
         .then(result => {
@@ -301,6 +311,7 @@ const db = {
     getUserData,
     addProduct,
     getProduct,
+    getAllProduct,
     addToDrive,
     removeFromDrive,
     updateUserData,

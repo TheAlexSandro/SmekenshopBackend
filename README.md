@@ -55,29 +55,6 @@ Required parameter:
 
 Mengembalikan hasil JWT berisi id akun (silahkan verifikasi dengan endpoint /auth/verify)
 
-<b><u>Melalui GOOGLE</u></b>
-
-<b>/auth/google/authorize (POST)</b>
-
-Masuk dengan google
-
-Required parameter:
-<pre>-</pre>
-
-Mengembalikan hasil berupa URL autentikasi
-
-<b>/auth/google/callback (POST)</b>
-
-Untuk menerima umpan balik hasil yang diberikan google.
-
-Required parameter:
-<pre>code, state</pre>
-
-- code: hasil generate otomatis
-- state: kustom state berisi request_id (request_id tidak boleh dimodifikasi)
-
-Mengembalikan hasil JWT berisi id akun (silahkan verifikasi dengan endpoint /auth/verify)
-
 ### Endpoint /product/upload (POST)
 Endpoint ini untuk mengunggah file ke google drive dan menyimpan informasi produk ke mongodb. Permintaan dilakukan melalui form-data dengan buffer file dan parameter.
 
@@ -129,6 +106,17 @@ Require parameter:
 
 - seller_id: ID unik pada setiap akun
 - product_id: ID unik pada setiap produk
+
+## Endpoint /product/summary (POST)
+Digunakan untuk mendapatkan daftar produk berdasarkan like, view dan interaction.
+Semua produk dibandingkan dengan menjumlahkan like, view dan interaction lalu mengurutkan dari jumlah yang paling banyak.
+
+⚠️ Jika semua produk memiliki like = 0, view = 0, interaction = 0 atau tidak ada produk dalam database. Maka tidak akan mengembalikan hasil apa-apa.
+
+Required parameter:
+<pre>-</pre>
+
+Mengembalikan hasil produk dari urutan penjumlahan (like, view, interaction) terbanyak.
 
 ## Endpoint /verify/auth (POST)
 Digunakan untuk mendapatkan informasi lengkap akun, membutuhkan JWT

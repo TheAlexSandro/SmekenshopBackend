@@ -63,6 +63,10 @@
             "code": "PARAMETER_CANNOT_EMPTY",
             "message": "Anda menggunakan {PARAMETER} parameter. Jika Anda menggunakannya, maka nilai tidak boleh kosong."
         },
+        "404.no_product": {
+            "code": "EMPTY_PRODUCT",
+            "message": "Kami saat ini tidak memiliki produk, silahkan kembali lagi nanti."
+        },
         "400.error": {
             "code": "UNKNOWN_ERROR"
         }

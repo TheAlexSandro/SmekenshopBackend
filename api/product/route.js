@@ -84,7 +84,7 @@ const productUpload = (req, res) => {
                             console.log(err);
                             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                             if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
-                            
+
                             return helper.response(res, 200, true, 'Berhasil!', null, { product_id });
                         })
                     })
@@ -178,13 +178,13 @@ const productRemove = (req, res) => {
                         resolve(rr);
                     });
                 });
-            });            
+            });
 
             Promise.all(removePromises).then(() => {
                 db.removeProduct(seller_id, product_id, (rest, err) => {
                     if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
                     if (!rest) return helper.response(res, 400, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
-    
+
                     return helper.response(res, 200, true, 'Produk dihapus!');
                 })
             }).catch(err => helper.response(res, 400, false, err, errors[400]['400.error'].code));
@@ -192,4 +192,25 @@ const productRemove = (req, res) => {
     })
 }
 
-module.exports = { productUpload, productUpdate, productRemove };
+const productSummary = (req, res) => {
+    db.getAllProduct((rest, err) => {
+        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+        if (!rest) return helper.response(res, 400, false, errors[404]['404.no_product'].message, errors[404]['404.no_product'].code);
+
+        if (!Array.isArray(rest)) return helper.response(res, 400, false, "Data format error", errors[400]['400.error'].code);
+
+        const filteredProducts = rest.filter(product => product.like > 0 || product.view > 0 || product.interaction > 0);
+
+        if (filteredProducts.length === 0) {
+            return helper.response(res, 400, false, "Tidak ada product yang memenuhi kriteria.", errors[400]['400.error'].code);
+        }
+
+        const sortedProducts = filteredProducts.sort((a, b) => {
+            return (b.like + b.view + b.interaction) - (a.like + a.view + a.interaction);
+        });
+
+        return helper.response(res, 200, true, `Berhasil!`, null, sortedProducts);
+    });
+};
+
+module.exports = { productUpload, productUpdate, productRemove, productSummary };
