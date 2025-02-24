@@ -33,10 +33,6 @@
 //     return helper.response(res, 200, true, `Berhasil!`, null, { url: authUrl });
 // }
 
-// /**
-//  * @deprecated this endpoint are not supported anymore, it will be removed in the future update.
-//  */
-
 // const googleCallback = (req, res) => {
 //     try {
 //         const { code, state } = req.query;
