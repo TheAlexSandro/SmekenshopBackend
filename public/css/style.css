@@ -1,0 +1,85 @@
+/**
+* Hak Cipta © oleh Tim Inovator
+* Dalam asosiasi SMKN 1 Blitar
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body,
+html {
+    padding: 0 30px 0 30px;
+    overflow: hidden;
+    font-family: "Poppins", serif;
+    font-style: normal;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+header .container {
+    max-width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+header .container img {
+    height: 200px;
+    width: auto;
+    position: relative;
+    display: inline-block;
+}
+
+header .container h1 {
+    font-size: 25px;
+}
+
+header .container p {
+    margin-top: -10px;
+    font-weight: 500;
+    font-size: 15px;
+}
+
+@media screen and (width < 768px) {
+
+    header .container {
+        max-width: 100%;
+    }
+
+    header .container img {
+        height: 150px;
+    }
+
+    header .container h1 {
+        font-size: 20px;
+    }
+
+    header .container p {
+        font-size: 15px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    
+    header .container {
+        max-width: 80%;
+    }
+
+    header .container img {
+        height: 250px;
+    }
+
+    header .container h1 {
+        font-size: 35px;
+    }
+
+    header .container p {
+        font-size: 25px;
+    }
+}
