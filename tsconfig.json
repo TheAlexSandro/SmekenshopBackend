@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "resolveJsonModule": true,
+        "moduleResolution": "NodeNext",
+        "esModuleInterop": true,
+        "target": "ES2024",
+        "module": "NodeNext",
+        "outDir": "dist",
+        "rootDir": "./",
+        "incremental": true
+    },
+    "include": ["api/**/*.ts", "components/**/*.ts", "index.ts", "public"],
+    "exclude": ["node_modules", "google"]
+}
