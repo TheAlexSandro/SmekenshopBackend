@@ -1,0 +1,115 @@
+{
+    "403": {
+        "403.cors": {
+            "code": "CORS_FORBIDDEN_ACCESS",
+            "message": "Akses Ditolak"
+        },
+        "403.access": {
+            "code": "ACCESS_DENIED",
+            "message": "Tidak dapat menentukan izin akses, akses diblokir."
+        },
+        "403.method": {
+            "code": "HTTP_METHOD_DENIED",
+            "message": "Metode HTTP ini tidak diizinkan."
+        },
+        "403.field": {
+            "code": "FORBIDDEN_FIELD",
+            "message": "Anda tidak memiliki izin untuk mengedit field ini."
+        },
+        "403.update": {
+            "code": "FORBIDDEN_UPDATE_REQUEST",
+            "message": "Tidak dapat memperbarui field {FIELD} ketika produk dalam status pending atau rejected."
+        }
+    },
+    "401": {
+        "401.access": {
+            "code": "UNAUTHORIZED_CLERENCE",
+            "message": "Anda tidak memiliki izin untuk memasuki area ini."
+        },
+        "401.failed": {
+            "code": "UNAUTHORIZED_REQUEST",
+            "message": "Tidak dapat menentukan status masuk, silahkan coba lagi nanti."
+        },
+        "401.password": {
+            "code": "UNAUTHORIZED_ACCESS_PASSWORD",
+            "message": "Kata sandi akun ini salah."
+        },
+        "401.server_id": {
+            "code": "UNAUTHORIZED_ACCESS_SERVER",
+            "message": "Server ID tidak dapat diterima."
+        },
+        "401.jwt": {
+            "code": "UNAUTHORIZED_ACCESS_TOKEN",
+            "message": "Access token tidak ada atau telah kadaluarsa."
+        },
+        "401.error": {
+            "code": "UNAUTHORIZED"
+        }
+    },
+    "400": {
+        "400.parameter": {
+            "code": "MISSING_PARAMETERS",
+            "message": "parameter {PARAMETER} dibutuhkan."
+        },
+        "400.available": {
+            "code": "USER_AVAILABLE",
+            "message": "Pengguna ini telah berada di basis data."
+        },
+        "400.request_id": {
+            "code": "REQUEST_ID_INVALID",
+            "message": "ID permintaan ditolak."
+        },
+        "400.missing_file": {
+            "code": "MISSING_FILE",
+            "message": "Tidak ada file yang harus diunggah."
+        },
+        "400.double_param": {
+            "code": "DOUBLE_PARAMETER_DATA",
+            "message": "Silahkan pilih satu parameter dari email atau ID."
+        },
+        "400.opt_param": {
+            "code": "PARAMETER_CANNOT_EMPTY",
+            "message": "Anda menggunakan {PARAMETER} parameter. Jika Anda menggunakannya, maka nilai tidak boleh kosong."
+        },
+        "404.no_product": {
+            "code": "EMPTY_PRODUCT",
+            "message": "Kami saat ini tidak memiliki produk, silahkan kembali lagi nanti."
+        },
+        "400.error": {
+            "code": "UNKNOWN_ERROR"
+        }
+    },
+    "404": {
+        "404.user": {
+            "code": "USER_NOT_FOUND",
+            "message": "Pengguna tidak ada dalam basis data."
+        },
+        "404.jwt": {
+            "code": "USER_JWT_FOUND",
+            "message": "JWT ada tetapi pengguna tidak ada dalam basis data."
+        },
+        "404.upload_cancel": {
+            "code": "UPLOAD_CANCEL",
+            "message": "Pengguna tidak ada dalam basis data, pengunggahan dibatalkan."
+        },
+        "404.product": {
+            "code": "PRODUCT_NOT_FOUND",
+            "message": "Tidak ada produk dengan ID yang diberikan, silahkan cek kembali."
+        },
+        "404.user_product": {
+            "code": "PRODUCT_INVALID",
+            "message": "Pengguna ini tidak memiliki produk dengan ID yang diberikan."
+        },
+        "404.product_list": {
+            "code": "PRODUCT_LIST_NOT_FOUND",
+            "message": "Tidak ada produk dengan status yang diberikan."
+        },
+        "404.product_review": {
+            "code": "PRODUCT_REVIEW_NOT_FOUND",
+            "message": "Produk ini tidak dalam status {STATUS}."
+        },
+        "404.error": {
+            "code": "NOT_FOUND"
+        }
+    }
+}
