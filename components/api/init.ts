@@ -32,7 +32,12 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if (['PUT', 'DELETE'].includes(req.method)) return helper.response(res, 403, false, errors[403]["403.method"].message, errors[403]["403.method"].code);
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+
+  if (['PUT', 'DELETE', 'OPTIONS'].includes(req.method)) return helper.response(res, 403, false, errors[403]["403.method"].message, errors[403]["403.method"].code);
   if (req.method === "GET") return res.sendFile(path.join(publicFolder, "index.html"));
   next();
 });
