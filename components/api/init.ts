@@ -15,7 +15,11 @@ const publicFolder: string = path.join(__dirname, "../../public");
 const app = express();
 
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(publicFolder));
