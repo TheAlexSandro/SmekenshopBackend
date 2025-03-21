@@ -11,7 +11,7 @@ const port: number = Number(process.env.PORT) || 3000;
 const memo: multer.StorageEngine = multer.memoryStorage();
 const uploads = multer({ storage: memo });
 
-app.post("/account/update", uploads.single("file"), updateAccount);``
+app.post("/account/update", uploads.single("file"), updateAccount);
 app.post("/account/role", updateRole);
 app.post("/auth/signup", authSignup);
 app.post("/auth/signin", authSignin);
@@ -23,7 +23,7 @@ app.post("/product/update", uploads.any(), productUpdate);
 app.post("/product/remove", productRemove);
 app.post("/product/summary", productSummary);
 app.post("/product/find", productSearch);
-app.post("/product/random", productRandom); ``
+app.post("/product/random", productRandom);
 app.post("/verify/token", verifyToken);
 app.post("/verify/product", verifyProduct);
 app.post("/verify/account", verifyAccount);
