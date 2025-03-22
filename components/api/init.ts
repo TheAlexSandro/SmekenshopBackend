@@ -16,6 +16,13 @@ const app = express();
 
 app.use(helmet());
 app.use(cors());
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
+})
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(publicFolder));
@@ -26,13 +33,6 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   }
   next();
 });
-
-app.use((req: Request, res: Reponse, next: NextFunction) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-})
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (['PUT', 'DELETE', 'OPTIONS'].includes(req.method)) return helper.response(res, 403, false, errors[403]["403.method"].message, errors[403]["403.method"].code);
