@@ -58,7 +58,8 @@ const productsSchema = new mongoose.Schema({
 
 const tokensSchema = new mongoose.Schema({
     id: String,
-    token: String
+    token: String,
+    login_at: String
 });
 
 interface UserData extends Document {
@@ -216,7 +217,8 @@ const updateUserProducts = (id: string, action: "add" | "remove", product_id: st
 
 // Simpan token
 const saveAccessToken = (token: string, id: string): Promise<void> => {
-    const newToken = new Tokens({ token, id });
+    const dates = helper.getDates();
+    const newToken = new Tokens({ token, id, login_at: dates });
     return newToken.save().then(() => undefined);
 };
 

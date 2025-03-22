@@ -213,6 +213,20 @@ const productInject = (product: any, sellerName: string) => {
     }
 }
 
+const getDates = () => {
+    const now = new Date();
+    const formattedDate = now.toLocaleString("id-ID", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+    });
+
+    return formattedDate;
+}
+
 export {
     response,
     detectParam,
@@ -226,5 +240,6 @@ export {
     sortedProduct,
     searchProduct,
     convertToJSON,
-    productInject
+    productInject,
+    getDates
 };
