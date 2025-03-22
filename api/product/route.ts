@@ -6,8 +6,8 @@ import * as helper from '../../components/helper/helper';
 import * as db from '../../components/database/db';
 import { Request, Response } from 'express';
 
-type ReviewStatus = 'approve' | 'reject';
-type ProductStatus = 'approved' | 'rejected' | 'pendings';
+type ReviewStatus = 'approve' | 'reject' | 'drop';
+type ProductStatus = 'approved' | 'rejected' | 'pendings' | 'dropped';
 
 interface ProductListRequest extends Request {
     body: {
@@ -80,8 +80,8 @@ export const getProductList = (req: ProductListRequest, res: Response): Response
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace('{PARAMETER}', 'status'), errors[400]['400.parameter'].code);
     }
 
-    if (!['approved', 'rejected', 'pendings'].includes(status)) {
-        return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected" dan "pendings".', errors[400]['400.error'].code);
+    if (!['approved', 'rejected', 'pendings', 'dropped'].includes(status)) {
+        return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected", "pendings" dan "dropped".', errors[400]['400.error'].code);
     }
 
     if (seller_id && seller_id === '') {
@@ -121,17 +121,20 @@ export const productReview = (req: ProductReviewRequest, res: Response): Respons
         return helper.response(res, 400, false, 'Parameter message tidak boleh kosong jika Anda menggunakan parameter ini.', errors[400]['400.error'].code);
     }
 
-    if (status && !['approved', 'rejected', 'pendings'].includes(status)) {
-        return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected" dan "pendings".', errors[400]['400.error'].code);
+    if (status && !['approved', 'rejected', 'pendings', 'dropped'].includes(status)) {
+        return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected", "pendings" dan "dropped".', errors[400]['400.error'].code);
     }
     const st = (status) ? false : true;
 
     db.getProduct(product_id, status ?? null, st, (rest: any, err: Error) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!rest) return helper.response(res, 404, false, errors[404]['404.product_review'].message.replace('{STATUS}', status ?? 'apapun'), errors[404]['404.product_review'].code);
-        const acts = action.toLocaleLowerCase() as 'approve' | 'reject';
-        if (rest.status === acts) return helper.response(res, 400, false, errors[400]['400.status'].message, errors[400]['400.status'].code);
-        const act = acts === 'approve' ? 'disetujui' : 'ditolak';
+        const acts = action.toLocaleLowerCase() as 'approve' | 'reject' | 'drop';
+        const cAct = (acts === 'approve') ? 'approved' : (acts === 'reject') ? 'rejected' : 'dropped';
+        if (rest.status === cAct) return helper.response(res, 400, false, errors[400]['400.status'].message, errors[400]['400.status'].code);
+        if (['approved', 'dropped'].includes(rest.status) && acts === 'reject') return helper.response(res, 400, false, errors[400]['400.status_denied'].message, errors[400]['400.status_denied'].code);
+
+        const act = (acts === 'approve') ? 'disetujui' : (acts === 'reject') ? 'ditolak' : 'dilarang';
 
         db.reviewProduct(product_id, rest.product_name, rest.description, rest.price, rest.category, rest.images, rest.seller.seller_id, rest.like, rest.view, rest.interaction, rest.release_date, acts, message ?? null, rest.stock, (rest: any, err: Error) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
@@ -213,8 +216,8 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
             return helper.response(res, 403, false, errors[403]['403.access'].message, errors[403]['403.access'].code);
         }
 
-        if (!['approved', 'rejected', 'pendings'].includes(status)) {
-            return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected" atau "pendings".', errors[400]['400.error'].code);
+        if (!['approved', 'rejected', 'pendings', 'dropped'].includes(status)) {
+            return helper.response(res, 400, false, 'Parameter status hanya bisa "approved", "rejected", "pendings" dan "dropped".', errors[400]['400.error'].code);
         }
 
         var act = String(action).includes(',') ? String(action).replace(/\[|\]/g, '').split(',') : [action];

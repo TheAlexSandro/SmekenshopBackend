@@ -199,7 +199,7 @@ Digunakan untuk mendapatkan daftar produk dalam status tertentu.
 Required parameter:
 <pre>status</pre>
 
-- status: status produk (approved, rejected, pendings)
+- status: status produk (approved, rejected, pendings, dropped)
 
 Optional parameter:
 <pre>seller_id</pre>
@@ -215,13 +215,13 @@ Required parameter:
 <pre>product_id, action</pre>
 
 - product_id: ID unik pada setiap produk
-- action: aksi yang akan diberikan (tersedia: approve dan reject)
+- action: aksi yang akan diberikan (tersedia: approve, reject dan drop)
 
 Optional parameter:
 <pre>message, status</pre>
 
 - message: pesan/saran yang ingin Anda berikan ke pengguna
-- status: status produk saat ini (approved, rejected, pendings)
+- status: status produk saat ini (approved, rejected, pendings, dropped)
 
 ⚠️ Pencarian akan dilakukan di 3 collection (global) jika tidak ada status yang diberikan.
 
@@ -250,7 +250,7 @@ Required parameter:
 
 - seller_id: ID unik pada setiap akun
 - product_id: ID unik pada setiap produk
-- status: status produk (approved, rejected, pendings)
+- status: status produk (approved, rejected, pendings, dropped)
 
 Optional parameter (gunakan pada kondisi tertentu seperti update)
 <pre>data, file, action, old_file_id</pre>
@@ -323,7 +323,7 @@ Require parameter:
 
 - seller_id: ID unik pada setiap akun
 - product_id: ID unik pada setiap produk
-- status: status produk (approved, rejected, pendings)
+- status: status produk (approved, rejected, pendings, dropped)
 
 ### Endpoint /product/summary (POST)
 Digunakan untuk mendapatkan daftar produk secara acak.
@@ -371,7 +371,7 @@ Required parameter:
 Optional parameter:
 <pre>status</pre>
 
-- status: status produk (tersedia: approved, rejected dan pendings)
+- status: status produk (tersedia: approved, rejected, pendings, dropped)
 
 ⚠️ Pencarian akan dilakukan di 3 collection (global) jika tidak ada status yang diberikan.
 

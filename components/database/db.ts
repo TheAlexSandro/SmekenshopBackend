@@ -102,20 +102,20 @@ interface TokenData extends Document {
     token: string;
 }
 
-const Users: mongoose.Model<UserData> = mongoose.model<UserData>("Users", usersSchema);
-const Tokens: mongoose.Model<TokenData> = mongoose.model<TokenData>("Tokens", tokensSchema);
-const Products: mongoose.Model<ProductData> = mongoose.model<ProductData>("Products", productsSchema);
-const Rejected: mongoose.Model<ProductData> = mongoose.model<ProductData>("Rejected", productsSchema);
-const Pendings: mongoose.Model<ProductData> = mongoose.model<ProductData>("Pendings", productsSchema);
+const dbs = <T>(model: mongoose.Model<T>, schema: mongoose.Schema<T>): mongoose.Model<T> => {
+    return mongoose.model<T>(model.modelName, schema);
+};
+
+const Users = dbs(mongoose.model<UserData>("Users", usersSchema), usersSchema);
+const Tokens = dbs(mongoose.model<TokenData>("Tokens", tokensSchema), tokensSchema);
+const Products = dbs(mongoose.model<ProductData>("Products", productsSchema), productsSchema);
+const Rejected = dbs(mongoose.model<ProductData>("Rejected", productsSchema), productsSchema);
+const Pendings = dbs(mongoose.model<ProductData>("Pendings", productsSchema), productsSchema);
+const Dropped = dbs(mongoose.model<ProductData>("Dropped", productsSchema), productsSchema);
 
 interface FileObject {
     buffer: Buffer;
     mimetype: string;
-}
-
-type ImageType = {
-    file_id: string;
-    file_name: string;
 };
 
 type DriveCallback = (result: { file_id: string; file_name: string } | null, error?: Error) => void;
@@ -331,9 +331,9 @@ const addProduct = (product_id: string | null = null, product_name: string, desc
 };
 
 
-const reviewProduct = (product_id: string, product_name: string, description: string, price: string | number, category: string, images: string[], seller_id: string, like: number, view: number, interaction: number, release_date: string, action: "approve" | "reject", message: string | null = null, stock: string, callback: UserCallback<boolean>): void => {
-    const status = (action === "approve") ? 'approved' : 'rejected';
-    const m = (action === "approve") ? null : message;
+const reviewProduct = (product_id: string, product_name: string, description: string, price: string | number, category: string, images: string[], seller_id: string, like: number, view: number, interaction: number, release_date: string, action: "approve" | "reject" | "drop", message: string | null = null, stock: string, callback: UserCallback<boolean>): void => {
+    const status = (action === "approve") ? 'approved' : (action === "reject") ? 'rejected' : 'dropped';
+    const m = (action === "approve") ? null : message; 
     const fileData = {
         status,
         product_id,
@@ -364,17 +364,18 @@ const reviewProduct = (product_id: string, product_name: string, description: st
             .catch((e) => callback(null, e));
 
         Pendings.deleteOne({ product_id }).exec();
+    } else if (action === "drop") {
+        Dropped.create(fileData)
+            .then(() => callback(true))
+            .catch((e) => callback(null, e));
+
+        Products.deleteOne({ product_id }).exec();
     }
 };
 
 const getProduct = (product_id: string, status: string, global: boolean = false, callback: UserCallback<ProductData | false>): void => {
     if (!global) {
-        const model: mongoose.Model<Document> = status === "approved"
-            ? Products
-            : status === "rejected"
-                ? Rejected
-                : Pendings;
-
+        const model: mongoose.Model<Document> = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
 
         model.findOne({ product_id })
             .then(doc => {
@@ -383,7 +384,7 @@ const getProduct = (product_id: string, status: string, global: boolean = false,
             })
             .catch((e) => callback(null, e));
     } else {
-        const collections = [Pendings, Products, Rejected];
+        const collections = [Pendings, Products, Rejected, Dropped];
         const searchPromises = collections.map(model => model.findOne({ product_id }).exec());
 
         Promise.all(searchPromises)
@@ -400,7 +401,7 @@ const getProduct = (product_id: string, status: string, global: boolean = false,
 
 const getAllProduct = async (status: string, seller_id: string | null = null, callback: UserCallback<Document[] | false>): Promise<void> => {
     try {
-        const model = status === "approved" ? Products : status === "rejected" ? Rejected : Pendings;
+        const model: mongoose.Model<Document> = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
         let query = seller_id ? { "seller.seller_id": seller_id } : {};
         const products = await model.find(query).lean();
 
@@ -426,7 +427,7 @@ const updateProduct = async (product_id: string, status: string, value: any, fie
                 value = [];
             }
     
-            const model = status === "approved" ? Products : status === "rejected" ? Rejected : Pendings;
+            const model: mongoose.Model<Document> = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
             const updated = await model.updateOne({ product_id }, { [field]: value });
     
             if (updated.modifiedCount > 0) {
@@ -442,14 +443,11 @@ const updateProduct = async (product_id: string, status: string, value: any, fie
 
 const updateProductImage = async (product_id: string, status: string, action: "update" | "add" | "remove", file_id: string | null, newFileId: string | null = null, newFileName: string | null = null, callback: UserCallback<boolean>): Promise<void> => {
     try {
-        const model = status === "approved" ? Products : status === "rejected" ? Rejected : Pendings;
+        const model = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
         const product = await model.findOne({ product_id });
 
         if (!product) return callback(false);
         if (!Array.isArray(product.images)) return callback(false);
-
-        const images: ImageType[] = product.images as unknown as ImageType[];
-        let updatedImages: ImageType[];
         let updated: any;
 
         if (action === "update") {
@@ -486,9 +484,7 @@ const updateProductImage = async (product_id: string, status: string, action: "u
 };
 
 const removeProduct = (seller_id: string, status: string, product_id: string, callback: UserCallback<boolean>): void => {
-    const model = status === "approved" ? Products 
-                : status === "rejected" ? Rejected 
-                : Pendings;
+    const model: mongoose.Model<Document> = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
 
     model.findOneAndDelete({ product_id })
         .then((deletedProduct) => {

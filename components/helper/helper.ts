@@ -134,7 +134,10 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                         new Promise<ProductData | null>((resolve) => {
                             db.getProduct(product.product_id, "approved", false, (rest: any, err: Error) => {
                                 if (err || !rest) return resolve(null);
-                                resolve(product);
+                                db.getUserData(rest.seller.seller_id, (rests: any, err: Error) => {
+                                    if (err || !rests) return resolve(null);
+                                    resolve(productInject(product, rests.name));
+                                });
                             });
                         })
                     )
@@ -147,7 +150,19 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                     .filter((product) => !validProducts.some((p) => p.product_id === product.product_id))
                     .sort(() => Math.random() - 0.5)
                     .slice(0, missingCount);
-                const updatedProducts = [...validProducts, ...newProducts];
+                const news = await Promise.all(
+                    newProducts.map(
+                        (product) =>
+                            new Promise<ProductData | null>((resolve) => {
+                                db.getUserData(product.seller.seller_id, (rests: any, err: Error) => {
+                                    if (err || !rests) return resolve(null);
+                                    resolve(productInject(product, rests.name));
+                                });
+                            })
+                    )
+                );
+
+                const updatedProducts = [...validProducts, ...news.filter((p) => p !== null)] as ProductData[];
                 await redClient.setex("summary", Number(process.env.REDIS_TTL), JSON.stringify(updatedProducts));
 
                 return resolve(updatedProducts);
