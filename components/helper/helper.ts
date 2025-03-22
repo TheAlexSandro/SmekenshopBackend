@@ -216,6 +216,7 @@ const productInject = (product: any, sellerName: string) => {
 const getDates = () => {
     const now = new Date();
     const formattedDate = now.toLocaleString("id-ID", {
+        timeZone: "Asia/Jakarta",
         day: "2-digit",
         month: "2-digit",
         year: "2-digit",
