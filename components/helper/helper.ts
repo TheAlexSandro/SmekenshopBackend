@@ -2,18 +2,36 @@ import * as argon2 from "argon2";
 import * as JWT from "jsonwebtoken";
 import * as errors from "../../data/error.json";
 import { Request, Response, NextFunction } from "express";
+import Redis from "ioredis";
 import * as db from "../database/db";
+
+const redClient = new Redis(process.env.REDIS_URI as string, {
+    maxRetriesPerRequest: null,
+    enableReadyCheck: true,
+    tls: {
+        rejectUnauthorized: true,
+    }
+});
 
 type UserCallback<T> = (result: T | null, error?: Error) => void;
 
-interface Product {
-    [key: string]: any;
-}
-
-interface SortedProductResponse {
-    ok: boolean;
-    msg?: string;
-    result?: Product[];
+interface ProductData {
+    status: string;
+    product_id: string;
+    product_name: string;
+    description: string;
+    price: string;
+    category: string;
+    images: string[];
+    like: string;
+    view: string;
+    interaction: string;
+    release_date: string;
+    seller: {
+        seller_id: string;
+    },
+    message: string | null;
+    stock: string,
 }
 
 const response = (res: Response, status_code: number, ok: boolean, message: string | Error, error_code: string | null = null, result: any = null): Response => {
@@ -104,33 +122,46 @@ const getDate = (): string => {
     return `${day}/${month}/${year}`;
 };
 
-const sortedProduct = async (rest: Product[]): Promise<SortedProductResponse> => {
-    const filter = rest.filter(product => product.like > 0 || product.view > 0 || product.interaction > 0);
+const sortedProduct = async (rest: ProductData[], limit: number): Promise<ProductData[] | Error> => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const getCache = await redClient.get("summary");
+            let cached: ProductData[] = getCache ? JSON.parse(getCache) : [];
 
-    if (filter.length === 0) {
-        return { ok: false, msg: "Tidak ada produk yang memenuhi kriteria." };
-    }
+            const validProducts = (
+                await Promise.all(
+                    cached.map((product) =>
+                        new Promise<ProductData | null>((resolve) => {
+                            db.getProduct(product.product_id, "approved", false, (rest: any, err: Error) => {
+                                if (err || !rest) return resolve(null);
+                                resolve(product);
+                            });
+                        })
+                    )
+                )
+            ).filter((product) => product !== null) as ProductData[];
+            const missingCount = limit - validProducts.length;
 
-    const sortedProducts = filter.sort((a, b) =>
-        (b.like + b.view + b.interaction) - (a.like + a.view + a.interaction)
-    );
+            if (missingCount > 0) {
+                const newProducts = rest
+                    .filter((product) => !validProducts.some((p) => p.product_id === product.product_id))
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, missingCount);
+                const updatedProducts = [...validProducts, ...newProducts];
+                await redClient.setex("summary", Number(process.env.REDIS_TTL), JSON.stringify(updatedProducts));
 
-    const updatedProducts = await Promise.all(sortedProducts.map(async (product) => {
-        const sellerName = await new Promise<string>((resolve) => {
-            db.getUserData(product.seller.seller_id, (result: any, err: Error) => {
-                if (err || !result) return resolve('N/A');
-                resolve(result.name);``
-            });
-        });
+                return resolve(updatedProducts);
+            }
 
-        return productInject(product, sellerName);
-    }))
-
-    return { ok: true, result: updatedProducts };
+            resolve(validProducts);
+        } catch (error) {
+            console.error("Error in sortedProduct:", error);
+            reject(error);
+        }
+    });
 };
 
-
-const searchProduct = (products: Product[], query: string | null = null, category: string | null = null): Product[] => {
+const searchProduct = (products: ProductData[], query: string | null = null, category: string | null = null): ProductData[] => {
     if (query) { query = query.toLowerCase(); }
     if (category) { category = category.toLowerCase(); }
 
@@ -153,7 +184,7 @@ const convertToJSON = (input: string) => {
         .replace(/"\s*([a-zA-Z0-9_]+)\s*"\s*:\s*"([^"]*)"/g, '"$1":"$2"');
 };
 
-const productInject = (product: Product, sellerName: string) => {
+const productInject = (product: any, sellerName: string) => {
     return {
         ...product,
         images: product.images.map((image: { file_id: string }) => ({

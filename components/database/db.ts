@@ -94,7 +94,7 @@ interface ProductData extends Document {
         seller_id: string;
     },
     message: string | null;
-    strock: string,
+    stock: string,
 }
 
 interface TokenData extends Document {

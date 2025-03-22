@@ -4,7 +4,7 @@ import * as db from '../../components/database/db';
 import * as errors from '../../data/error.json';
 
 type Action = 'update' | 'remove';
-type Role = 'admin' | 'user';
+type Role = 'admin' | 'user' | 'banned';
 
 interface UpdateAccountRequest extends Request {
     body: {
@@ -171,8 +171,8 @@ export const updateRole = (req: UpdateRoleRequest, res: Response): Response | vo
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `id, role`), errors[400]['400.parameter'].code);
     }
 
-    if (!['admin', 'user'].includes(role)) {
-        return helper.response(res, 400, false, 'Parameter role hanya bisa "admin" atau "user".', errors[400]['400.error'].code);
+    if (!['admin', 'user', 'banned'].includes(role)) {
+        return helper.response(res, 400, false, 'Parameter role hanya bisa "admin", "user", atau "banned".', errors[400]['400.error'].code);
     }
 
     db.updateUserData(id, 'update', role, 'role', (result: any, err: Error) => {

@@ -58,16 +58,16 @@ interface ProductRemoveRequest extends Request {
     }
 }
 
+interface ProductSummaryRequest extends Request {
+    body: {
+        limit?: number;
+    }
+}
+
 interface ProductSearchRequest extends Request {
     body: {
         query?: string;
         category?: string;
-    }
-}
-
-interface ProductRandomRequest extends Request {
-    body: {
-        limit: number;
     }
 }
 
@@ -129,9 +129,11 @@ export const productReview = (req: ProductReviewRequest, res: Response): Respons
     db.getProduct(product_id, status ?? null, st, (rest: any, err: Error) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!rest) return helper.response(res, 404, false, errors[404]['404.product_review'].message.replace('{STATUS}', status ?? 'apapun'), errors[404]['404.product_review'].code);
-        const act = action === 'approve' ? 'disetujui' : 'ditolak';
+        const acts = action.toLocaleLowerCase() as 'approve' | 'reject';
+        if (rest.status === acts) return helper.response(res, 400, false, errors[400]['400.status'].message, errors[400]['400.status'].code);
+        const act = acts === 'approve' ? 'disetujui' : 'ditolak';
 
-        db.reviewProduct(product_id, rest.product_name, rest.description, rest.price, rest.category, rest.images, rest.seller.seller_id, rest.like, rest.view, rest.interaction, rest.release_date, action, message ?? null, rest.stock, (rest: any, err: Error) => {
+        db.reviewProduct(product_id, rest.product_name, rest.description, rest.price, rest.category, rest.images, rest.seller.seller_id, rest.like, rest.view, rest.interaction, rest.release_date, acts, message ?? null, rest.stock, (rest: any, err: Error) => {
             if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
             if (!rest) return helper.response(res, 404, false, errors[404]['404.product'].message, errors[404]['404.product'].code);
 
@@ -278,7 +280,7 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
                             dt = await new Promise<string>((resolve, reject) => {
                                 db.getProduct(product_id, status, false, (rest: any, err: Error) => {
                                     if (err) return reject(helper.response(res, 400, false, err, errors[400]['400.error'].code));
-                                    resolve(String(Number(rest[f]) - 1));
+                                    if (dt) { resolve(String(Number(rest[f]) + Number(dt))) } else { resolve(String(Number(rest[f]) - 1)) }
                                 });
                             });
                         }
@@ -416,17 +418,23 @@ export const productRemove = (req: ProductRemoveRequest, res: Response): Respons
 /**
  * Endpoint untuk mendapatkan ringkasan produk.
  */
-export const productSummary = (req: Request, res: Response): Response | void => {
+export const productSummary = (req: ProductSummaryRequest, res: Response): Response | void => {
+    const { limit } = req.body;
+
+    if ((limit && String(limit) === '' )|| (limit && limit < 0)) {
+        return helper.response(res, 400, false, 'Jika Anda menggunakan parameter ini, maka nilai tidak boleh kosong dan parameter limit tidak boleh kurang dari 0.', errors[400]['400.error'].code);
+    }
+
     db.getAllProduct('approved', null, async (rest: any, err: Error) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!rest) return helper.response(res, 404, false, errors[404]['404.no_product'].message, errors[404]['404.no_product'].code);
 
         if (!Array.isArray(rest)) return helper.response(res, 400, false, "Data format error", errors[400]['400.error'].code);
 
-        const sortProduct = await helper.sortedProduct(rest);
-        if (!sortProduct.ok) return helper.response(res, 400, false, sortProduct.msg, errors[400]['400.error'].code);
+        const sortProduct = await helper.sortedProduct(rest,limit ?? 20);
+        if (!sortProduct) return helper.response(res, 400, false, `Tidak ada produk saat ini.`, errors[400]['400.error'].code);
 
-        return helper.response(res, 200, true, `Nanti kalau mau nampilin halaman produk, ambil product_id nya lalu verifikasi ke /verify/product, biar viewnya nambah.`, null, sortProduct.result);
+        return helper.response(res, 200, true, `Nanti kalau mau nampilin halaman produk, ambil product_id nya lalu verifikasi ke /verify/product, biar viewnya nambah.`, null, sortProduct);
     });
 };
 
@@ -466,41 +474,12 @@ export const productSearch = (req: ProductSearchRequest, res: Response): Respons
 
             return helper.response(res, 200, true, `Nanti kalau mau nampilin halaman produk, ambil product_id nya lalu verifikasi ke /verify/product, biar viewnya nambah.`, null, productList);
         } else {
-            const sortProduct = await helper.sortedProduct(rest);
-            if (!sortProduct.ok) {
-                return helper.response(res, 400, false, sortProduct.msg, errors[400]['400.error'].code);
+            const sortProduct = await helper.sortedProduct(rest, 20);
+            if (!sortProduct) {
+                return helper.response(res, 400, false, `Tidak ada produk saat ini.`, errors[400]['400.error'].code);
             }
 
-            return helper.response(res, 200, true, `Nanti kalau mau nampilin halaman produk, ambil product_id nya lalu verifikasi ke /verify/product, biar viewnya nambah.`, null, sortProduct.result);
+            return helper.response(res, 200, true, `Nanti kalau mau nampilin halaman produk, ambil product_id nya lalu verifikasi ke /verify/product, biar viewnya nambah.`, null, sortProduct);
         }
-    });
-};
-
-/**
- * Endpoint untuk mendapatkan produk acak
- */
-export const productRandom = (req: ProductRandomRequest, res: Response): Response | void => {
-    const { limit } = req.body;
-    if (!helper.detectParam(limit)) {
-        return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace('{PARAMETER}', 'limit'), errors[400]['400.parameter'].code);
-    }
-
-    db.getAllProduct('approved', null, async (rest: any[], err: Error) => {
-        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
-        if (!rest) return helper.response(res, 404, false, errors[404]['404.no_product'].message, errors[404]['404.no_product'].code);
-
-        const randomProduct = rest.sort(() => Math.random() - 0.5).slice(0, limit);
-        const productList = await Promise.all(randomProduct.map(async (product) => {
-            const sellerName = await new Promise<string>((resolve) => {
-                db.getUserData(product.seller.seller_id, (result: any, err: Error) => {
-                    if (err || !result) return resolve('N/A');
-                    resolve(result.name);
-                });
-            });
-
-            return helper.productInject(product, sellerName);
-        }))
-
-        return helper.response(res, 200, true, `Berikut hasil dari produk acak.`, null, productList);
     });
 };

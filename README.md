@@ -133,10 +133,19 @@ Tanpa field lain:
 {interaction}
 </pre>
 
-Mengembalikan hasil id atau email
+<i><ins>Penempatan Field</ins></i>
+✅
+- <code>{name:"saya",interaction}</code>
+- <code>{interaction}</code>
+
+❌
+- <code>{interaction,name:"saya"}</code>
+
+⚠️ Jangan pernah menaruh field yang memiliki nilai di belakang field tanpa nilai.
 
 ⚠️ Anda tidak dapat memperbarui field id dan role disini.
 
+Mengembalikan hasil id atau email
 ### Endpoint /account/role (POST)
 Gunakan ini untuk memperbarui role pengguna
 
@@ -144,7 +153,7 @@ Required parameter:
 <pre>id, role</pre>
 
 - id: ID unik pada setiap akun
-- role: peran yang diinisiasikan (tersedia: user dan admin)
+- role: peran yang diinisiasikan (tersedia: user, admin, dan banned)
 
 Mengembalikan hasil berupa id akun, silahkan verifikasi ke /verify/account
 
@@ -259,7 +268,7 @@ Untuk memperbarui field interaction dan like, Anda tidak perlu memberikan value,
 
 Dengan field lain:
 <pre>
-{product_name:"saya",interaction,like}
+{product_name:"Bakso",interaction,like}
 </pre>
 
 Tanpa field lain:
@@ -267,12 +276,17 @@ Tanpa field lain:
 {interaction,like}
 </pre>
 
+<ins>Untuk memperbarui stock gunakan field {stock} atau {stock:"12"}</ins>
+- {stock} hanya untuk mengurangi jumlah stok [-1]
+- {stock:"12"} untuk menambah stok produk saat ini
+
+<i><ins>Penempatan Field</ins></i>
 ✅
-- <code>{product_name:"saya",interaction,like}</code>
+- <code>{product_name:"Bakso",interaction,like}</code>
 - <code>{interaction,like}</code>
 
 ❌
-- <code>{interaction,product_name:"saya"}</code>
+- <code>{interaction,product_name:"Bakso"}</code>
 
 ⚠️ Jangan pernah menaruh field yang memiliki nilai di belakang field tanpa nilai.
 
@@ -312,13 +326,15 @@ Require parameter:
 - status: status produk (approved, rejected, pendings)
 
 ### Endpoint /product/summary (POST)
-Digunakan untuk mendapatkan daftar produk berdasarkan like, view dan interaction.
-Semua produk dibandingkan dengan menjumlahkan like, view dan interaction lalu mengurutkan dari jumlah yang paling banyak.
-
-⚠️ Jika semua produk memiliki like = 0, view = 0, interaction = 0 atau tidak ada produk dalam database. Maka tidak akan mengembalikan hasil apa-apa.
+Digunakan untuk mendapatkan daftar produk secara acak.
 
 Required parameter:
 <pre>-</pre>
+
+Optional parameter:
+<pre>limit</pre>
+
+- limit: batasan seberapa banyak produk yang akan diambil. Jika tidak ada, maka hanya akan mengembalikan 20 produk
 
 Mengembalikan hasil produk dari urutan penjumlahan (like, view, interaction) terbanyak.
 
@@ -332,16 +348,6 @@ Optional parameter:
 <pre>query, category</pre>
 
 Mengembalikan hasil dari nama produk yang memiliki kecocokan/kemiripan dengan kueri atau kategori, jika tidak ada produk yang memiliki kecocokan/kemiripan maka akan mengembalikan product summary.
-
-### Endpoint /product/random (POST)
-Digunakan untuk mendapatkan produk secara acak setiap harinya.
-
-Required parameter:
-<pre>limit</pre>
-
-- limit: batasan berapa banyak produk yang akan di kembalikan.
-
-Mengembalikan hasil berupa daftar produk berdasarkan limit
 
 ### Endpoint /verify/token (POST)
 Digunakan untuk mendapatkan informasi lengkap akun, membutuhkan JWT
