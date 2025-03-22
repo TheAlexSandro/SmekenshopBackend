@@ -415,11 +415,11 @@ const getAllProduct = async (status: string, seller_id: string | null = null, ca
 const updateProduct = async (product_id: string, status: string, value: any, field: string, callback: UserCallback<string | "not_found" | boolean>): Promise<void> => {
     try {
         getProduct(product_id, status, true, async (product: ProductData | false, err?: Error) => {
-            if (err) return callback(null, err);
-            if (!product) return callback(false);
+            if (err) { if (callback) return callback(null, err); }
+            if (!product) { if (callback) return callback(false); }
 
             if (!Object.prototype.hasOwnProperty.call(product, field)) {
-                return callback("not_found");
+                if (callback) return callback("not_found");
             }
     
             if (field === "images") {
@@ -430,13 +430,13 @@ const updateProduct = async (product_id: string, status: string, value: any, fie
             const updated = await model.updateOne({ product_id }, { [field]: value });
     
             if (updated.modifiedCount > 0) {
-                return callback(product_id);
+                if (callback) return callback(product_id);
             } else {
-                return callback('not_edited');
+                if (callback) return callback('not_edited');
             }
         });
     } catch (error) {
-        return callback(null, error);
+        if (callback) return callback(null, error);
     }
 };
 
