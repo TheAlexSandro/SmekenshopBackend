@@ -116,8 +116,8 @@ Optional parameter:
 
 Hanya mendukung single action.
 
-- "update" = memperbarui foto profile (gunakan aksi ini untuk upload profile)
-- "remove" = menghapus foto profile (jika Anda menggunakan aksi ini, maka Anda tidak perlu mengupload gambar)
+- update = memperbarui foto profile (gunakan aksi ini untuk upload profile)
+- remove = menghapus foto profile (jika Anda menggunakan aksi ini, maka Anda tidak perlu mengupload gambar)
 
 <b>Data JSON Terminology</b>
 
@@ -125,21 +125,21 @@ Untuk memperbarui field interaction, Anda tidak perlu memberikan value, misal:
 
 Dengan field lain:
 <pre>
-{name:"saya",interaction}
+'{name:"saya",interaction}'
 </pre>
 
 Tanpa field lain:
 <pre>
-{interaction}
+'{interaction}'
 </pre>
 
 <i><ins>Penempatan Field</ins></i>
 ✅
-- <code>{name:"saya",interaction}</code>
-- <code>{interaction}</code>
+- <code>'{name:"saya",interaction}'</code>
+- <code>'{interaction}'</code>
 
 ❌
-- <code>{interaction,name:"saya"}</code>
+- <code>'{interaction,name:"saya"}'</code>
 
 ⚠️ Jangan pernah menaruh field yang memiliki nilai di belakang field tanpa nilai.
 
@@ -268,33 +268,33 @@ Untuk memperbarui field interaction dan like, Anda tidak perlu memberikan value,
 
 Dengan field lain:
 <pre>
-{product_name:"Bakso",interaction,like}
+'{product_name:"Bakso",interaction,like}'
 </pre>
 
 Tanpa field lain:
 <pre>
-{interaction,like}
+'{interaction,like}'
 </pre>
 
 <ins>Untuk memperbarui stock gunakan field {stock} atau {stock:"12"}</ins>
-- {stock} hanya untuk mengurangi jumlah stok [-1]
-- {stock:"12"} untuk menambah stok produk saat ini
+- '{stock}' hanya untuk mengurangi jumlah stok [-1]
+- '{stock:"12"}' untuk menambah stok produk saat ini
 
 <i><ins>Penempatan Field</ins></i>
 ✅
-- <code>{product_name:"Bakso",interaction,like}</code>
-- <code>{interaction,like}</code>
+- <code>'{product_name:"Bakso",interaction,like}'</code>
+- <code>'{interaction,like}'</code>
 
 ❌
-- <code>{interaction,product_name:"Bakso"}</code>
+- <code>'{interaction,product_name:"Bakso"}'</code>
 
 ⚠️ Jangan pernah menaruh field yang memiliki nilai di belakang field tanpa nilai.
 
 <b>Action Terminology</b>
 
-- "add" = menambahkan gambar ke produk
-- "update" = memperbarui gambar, misal: Anda ingin memperbarui (mengganti) gambar A, maka gunakan action ini
-- "remove" = digunakan untuk menghapus gambar (Anda perlu mengupload gambar jika menggunakan aksi ini)
+- add = menambahkan gambar ke produk
+- update = memperbarui gambar, misal: Anda ingin memperbarui (mengganti) gambar A, maka gunakan action ini
+- remove = digunakan untuk menghapus gambar (Anda perlu mengupload gambar jika menggunakan aksi ini)
 
 Parameter action mendukung single (1 aksi) atau array (beberapa aksi, pisahkan dengan "," (koma)), contoh:
 
@@ -307,8 +307,8 @@ Double: add,update
 
 Contoh parameter old_file_id
 <pre>
-Single: some_id
-Double: [some_id_1,some_id_2]
+Single: "some_id"
+Double: "[some_id_1,some_id_2]"
 </pre>
 
 ⚠️ Jika Anda hanya ingin memperbarui data dan tidak mengupload file, tidak perlu menggunakan parameter action dan old_file_id.
