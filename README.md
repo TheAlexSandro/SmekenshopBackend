@@ -276,14 +276,18 @@ Tanpa field lain:
 '{interaction,like}'
 </pre>
 
-<ins>Untuk memperbarui stock gunakan field {stock} atau {stock:"12"}</ins>
+Untuk memperbarui stock gunakan field '{stock}' atau '{stock:"12"}'
 - '{stock}' hanya untuk mengurangi jumlah stok [-1]
 - '{stock:"12"}' untuk menambah stok produk saat ini
 
+Untuk memperbarui like gunakan field '{like:"+"}' atau '{like:"-"}'
+- '{like:"+"}' untuk menambah like
+- '{like:"-"}' untuk mengurangi like
+
 <i><ins>Penempatan Field</ins></i>
 ✅
-- <code>'{product_name:"Bakso",interaction,like}'</code>
-- <code>'{interaction,like}'</code>
+- <code>'{product_name:"Bakso",like:"+",interaction}'</code>
+- <code>'{like:"-",interaction}'</code>
 
 ❌
 - <code>'{interaction,product_name:"Bakso"}'</code>

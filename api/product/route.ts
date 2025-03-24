@@ -267,7 +267,12 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
                             dt = await new Promise<string>((resolve, reject) => {
                                 db.getProduct(product_id, status, false, (rest: any, err: Error) => {
                                     if (err) return reject(helper.response(res, 400, false, err, errors[400]['400.error'].code));
-                                    resolve(String(Number(rest[f]) + 1));
+                                    if (f === 'like') {
+                                        if (!dt || !['+', '-'].includes(dt as string)) return reject(helper.response(res, 400, false, "Field like harus bernilai + atau -", errors[400]['400.error'].code));
+                                        if (dt === '+') { resolve(String(Number(rest[f]) + 1)); } else { resolve(String(Number(rest[f]) - 1)); }
+                                    } else {
+                                        resolve(String(Number(rest[f]) + 1));
+                                    }
                                 });
                             });
                         
