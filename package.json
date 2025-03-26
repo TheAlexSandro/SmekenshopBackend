@@ -19,7 +19,7 @@
     "version": "1.0.0",
     "main": "dist/index.js",
     "scripts": {
-        "build": "tsc",
+        "build": "npx tsc",
         "start": "nodemon dist/index.js"
     },
     "keywords": [
