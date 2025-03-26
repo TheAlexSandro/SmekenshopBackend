@@ -2,10 +2,10 @@ import "dotenv/config";
 import app from "./components/api/init";
 import multer from "multer";
 
-import { updateAccount, updateRole } from "./api/account/route";
-import { authSignup, authSignin, authSignout } from "./api/auth/route";
-import { getProductList, productReview, productUpload, productUpdate,  productRemove, productSummary, productSearch } from "./api/product/route";
-import { verifyToken, verifyProduct, verifyAccount } from "./api/verify/route";
+import { updateAccount, updateRole } from "./controllers/account/route";
+import { authSignup, authSignin, authSignout } from "./controllers/auth/route";
+import { getProductList, productReview, productUpload, productUpdate,  productRemove, productSummary, productSearch } from "./controllers/product/route";
+import { verifyToken, verifyProduct, verifyAccount } from "./controllers/verify/route";
 
 const port: number = Number(process.env.PORT) || 3000;
 const memo: multer.StorageEngine = multer.memoryStorage();

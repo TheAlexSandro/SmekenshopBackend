@@ -9,6 +9,6 @@
         "rootDir": "./",
         "incremental": true
     },
-    "include": ["api/**/*.ts", "components/**/*.ts", "index.ts", "public"],
+    "include": ["controllers/**/*.ts", "components/**/*.ts", "index.ts", "public"],
     "exclude": ["node_modules", "google"]
 }
