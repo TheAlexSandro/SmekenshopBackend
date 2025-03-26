@@ -43,8 +43,8 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
         return helper.response(res, 400, false, 'Membutuhkan nilai pada parameter id atau email.', errors[400]['400.error'].code);
     }
 
-    if (files && !['update', 'remove'].includes(action)) {
-        return helper.response(res, 400, false, 'Parameter action hanya bisa "update" atau "remove".', errors[400]['400.error'].code);
+    if (files && action !== 'update') {
+        return helper.response(res, 400, false, 'Parameter action hanya bisa "update", untuk menghapus profile gunakan action=remove (tidak perlu upload file).', errors[400]['400.error'].code);
     }
 
     if (action === 'update' && !files) {
