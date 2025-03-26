@@ -104,11 +104,12 @@ Required parameter:
 <pre>-</pre>
 
 Optional parameter:
-<pre>id, email, data, action</pre>
+<pre>id, email, data, action, file</pre>
 
 - id/email: gunakan ID unik akun atau email pengguna
 - data: data field yang akan diperbarui (harus berbentuk JSON, misal: {name:"me",whatsapp:"123456789"}. ⚠️ Jangan pernah mengirim JSON seperti: "{data json}" (dengan petik diantara data JSON) = format salah)
 - action: aksi yang akan dilakukan (tersedia: update dan remove)
+- file: buffer file yang akan disimpan
 
 ℹ️ Anda dapat menggunakan parameter data dan upload file bersamaan atau gunakan terpisah (endpoint ini mendukung pembaruan data bersamaan).
 
