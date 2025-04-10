@@ -13,7 +13,6 @@ interface UpdateAccountRequest extends Request {
         email?: string;
         data?: string;
         action?: Action;
-        password?: string;
     }
 }
 
@@ -28,7 +27,7 @@ interface UpdateRoleRequest extends Request {
  * Endpoint untuk mengupdate data pengguna.
  */
 export const updateAccount = async (req: UpdateAccountRequest, res: Response): Promise<Response | void> => {
-    const { server_id, id, email, data, action, password } = req.body;
+    const { server_id, id, email, data, action } = req.body;
     const files = (req as any).file;
 
     if (!helper.detectParam(server_id)) {
@@ -62,22 +61,6 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
                 return helper.response(res, 403, false, errors[403]['403.field'].message, errors[403]['403.field'].code);
             }
 
-            if (keys.some(f => ['password'].includes(f))) {
-                if (!password) return helper.response(res, 400, false, 'Membutuhkan parameter password jika ingin memperbarui kata sandi', errors[400]['400.error'].code);
-            
-                await new Promise<any>((resolve, reject) => {
-                    db.getUserData(ident, (resData: any, err: Error) => {
-                        if (err) return reject(helper.response(res, 400, false, err, errors[400]['400.error'].code));
-                        if (!resData) return reject(helper.response(res, 404, false, errors[404]['404.user'].message, errors[404]['404.user'].code));
-                        
-                        helper.pwd('dec', password, resData.password, (isValid: boolean, err: Error) => {
-                            if (!isValid) return reject(helper.response(res, 401, false, errors[401]['401.password'].message, errors[401]['401.password'].code));
-                            resolve(resData);
-                        });
-                    });
-                });
-            }
-
             await Promise.all(keys.map(async(f: string, i: number) => {
                 f = String(f).replace(/\{|\}/g, '');
                 let dt = values[i];
@@ -94,7 +77,7 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
 
                 if (f === 'password') {
                     dt = await new Promise<string>((resolve, reject) => {
-                        helper.pwd('enc', dt as string, process.env.PASSWORD_SALT, (result: string, err: Error) => {
+                        helper.pwd('enc', dt as string, null, (result: string, err: Error) => {
                             resolve(result);
                         });
                     });
