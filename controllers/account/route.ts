@@ -83,6 +83,16 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
                     });
                 }
 
+                if (f === 'is_still_seller') {
+                    dt = await new Promise<any>((resolve, reject) => {
+                        db.getUserData(ident, (result: any, error: Error) => {
+                            if (error) return reject(helper.response(res, 400, false, error.message, 'UNKNOW_ERROR'));
+                            var status = (result[f] == true) ? false : true;
+                            resolve(status);
+                        })
+                    })
+                }
+                
                 return new Promise<void>((resolve, reject) => {
                     db.updateUserData(ident, 'update', dt, f, (result: any, err: Error) => {
                         if (err) return reject(helper.response(res, 400, false, err, errors[400]['400.error'].code));

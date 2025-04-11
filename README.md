@@ -10,45 +10,46 @@ Berikut adalah struktur json daripada database pengguna dan produk
 ### Pengguna:
 <pre>
 {
-    role,
-    id,
-    name,
-    email,
-    interaction,
-    instance,
-    whatsapp,
-    profile_photo,
-    password,
-    products: [
+    role<string>,
+    id<string>,
+    name<string>,
+    email<string>,
+    interaction<string>,
+    instance<string | null>,
+    whatsapp<string | null>,
+    profile_photo<string | null>,
+    password<string>,
+    products<string array>: [
         'some id'
-    ],
-    statistics: {
+    ];
+    statistics<object>: {
         total_interaction,
         total_like
-    }
+    },
+    is_seller_now<boolean>
 }
 </pre>
 
 ### Produk
 <pre>
 {
-    status,
-    product_id,
-    product_name,
-    description,
-    price,
-    release_date,
-    category,
-    like,
-    view,
-    interaction,
-    images: [
+    status<string>,
+    product_id<string>,
+    product_name<string>,
+    description<string>,
+    price<string>,
+    release_date<string>,
+    category<string>,
+    like<string>,
+    view<string>,
+    interaction<string>,
+    images<array of object>: [
         {
             file_name,
             file_id
         }
     ],
-    seller: {
+    seller<object>: {
         seller_id
     }
 }
@@ -112,6 +113,12 @@ Optional parameter:
 - file: buffer file yang akan disimpan
 
 ℹ️ Anda dapat menggunakan parameter data dan upload file bersamaan atau gunakan terpisah (endpoint ini mendukung pembaruan data bersamaan).
+
+
+Field yang tidak memerlukan value:
+- interaction
+- is_still_seller
+
 
 <b>Action Terminology</b>
 
@@ -262,6 +269,11 @@ Optional parameter (gunakan pada kondisi tertentu seperti update)
 - old_file_id: file_id lama, gunakan ini jika Anda ingin menghapus gambar atau memperbarui gambar dalam daftar produk (single/double)
 
 ℹ️ Anda dapat menggunakan parameter data dan upload file bersamaan atau gunakan terpisah (endpoint ini mendukung pembaruan data bersamaan).
+
+
+Field yang tidak memerlukan value:
+- interaction
+
 
 <b>Data JSON Terminology</b>
 

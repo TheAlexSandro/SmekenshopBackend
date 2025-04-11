@@ -31,7 +31,8 @@ const usersSchema = new mongoose.Schema({
     statistics: {
         total_like: String,
         total_interaction: String,
-    }
+    },
+    is_still_seller: { type: Boolean, default: true }
 });
 
 const productsSchema = new mongoose.Schema({
@@ -76,7 +77,8 @@ interface UserData extends Document {
     statistics: {
         total_like: string,
         total_interaction: string,
-    }
+    },
+    is_still_seller: boolean;
 }
 
 interface ProductData extends Document {
