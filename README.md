@@ -51,7 +51,8 @@ Berikut adalah struktur json daripada database pengguna dan produk
     ],
     seller: {
         seller_id
-    }
+    },
+    is_disabled
 }
 </pre>
 
@@ -118,6 +119,9 @@ Optional parameter:
 Field yang tidak memerlukan value:
 - interaction
 - is_still_seller
+
+
+Cukup pass saja ke parameter data, e.g.: {interaction} atau {is_still_seller}
 
 
 <b>Action Terminology</b>
@@ -273,6 +277,10 @@ Optional parameter (gunakan pada kondisi tertentu seperti update)
 
 Field yang tidak memerlukan value:
 - interaction
+- is_disabled
+
+
+Cukup pass saja ke parameter data, e.g.: {interaction} atau {is_disabled}
 
 
 <b>Data JSON Terminology</b>
