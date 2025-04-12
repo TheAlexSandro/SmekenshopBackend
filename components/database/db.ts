@@ -54,7 +54,8 @@ const productsSchema = new mongoose.Schema({
         seller_id: String,
     },
     message: { type: String, default: null },
-    stock: String
+    stock: String,
+    is_disabled: { type: Boolean, default: false }
 });
 
 const tokensSchema = new mongoose.Schema({
@@ -98,6 +99,7 @@ interface ProductData extends Document {
     },
     message: string | null;
     stock: string,
+    is_disabled: boolean;
 }
 
 interface TokenData extends Document {

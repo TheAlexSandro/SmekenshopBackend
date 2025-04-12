@@ -10,46 +10,46 @@ Berikut adalah struktur json daripada database pengguna dan produk
 ### Pengguna:
 <pre>
 {
-    role<string>,
-    id<string>,
-    name<string>,
-    email<string>,
-    interaction<string>,
-    instance<string | null>,
-    whatsapp<string | null>,
-    profile_photo<string | null>,
-    password<string>,
-    products<string array>: [
+    role,
+    id,
+    name,
+    email,
+    interaction,
+    instance,
+    whatsapp,
+    profile_photo,
+    password,
+    products: [
         'some id'
     ];
-    statistics<object>: {
+    statistics: {
         total_interaction,
         total_like
     },
-    is_seller_now<boolean>
+    is_seller_now
 }
 </pre>
 
 ### Produk
 <pre>
 {
-    status<string>,
-    product_id<string>,
-    product_name<string>,
-    description<string>,
-    price<string>,
-    release_date<string>,
-    category<string>,
-    like<string>,
-    view<string>,
-    interaction<string>,
-    images<array of object>: [
+    status,
+    product_id,
+    product_name,
+    description,
+    price,
+    release_date,
+    category,
+    like,
+    view,
+    interaction,
+    images: [
         {
             file_name,
             file_id
         }
     ],
-    seller<object>: {
+    seller: {
         seller_id
     }
 }

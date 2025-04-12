@@ -254,7 +254,7 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
                     return helper.response(res, 403, false, errors[403]['403.field'].message, errors[403]['403.field'].code);
                 }
 
-                if (keys.some(f => ['like', 'interaction', 'stock'].includes(f)) && status !== 'approved') {
+                if (keys.some(f => ['like', 'interaction', 'stock', 'is_disabled'].includes(f)) && status !== 'approved') {
                     return helper.response(res, 403, false, errors[403]['403.update'].message.replace('{FIELD}', keys.join(', ')), errors[403]['403.update'].code);
                 }
 
@@ -291,6 +291,16 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
                                     if (dt) { resolve(String(Number(rest[f]) + Number(dt))) } else { resolve(String(Number(rest[f]) - 1)) }
                                 });
                             });
+                        }
+
+                        if (['is_disabled'].includes(f)) {
+                            dt = await new Promise<any>((resolve, reject) => {
+                                db.getProduct(product_id, 'approved', false, (result: any, error: Error) => {
+                                    if (error) return reject(helper.response(res, 400, false, error, 'UNKNOW_ERROR'));
+                                    var status = result[f] ? false : true;
+                                    resolve(status);
+                                })
+                            })
                         }
 
                         await new Promise<void>((resolve, reject) => {
