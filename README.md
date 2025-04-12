@@ -26,7 +26,7 @@ Berikut adalah struktur json daripada database pengguna dan produk
         total_interaction,
         total_like
     },
-    is_seller_now
+    is_still_seller
 }
 </pre>
 
