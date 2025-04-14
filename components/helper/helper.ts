@@ -31,7 +31,8 @@ interface ProductData {
         seller_id: string;
     },
     message: string | null;
-    stock: string,
+    stock: string;
+    is_disabled: boolean;
 }
 
 const response = (res: Response, status_code: number, ok: boolean, message: string | Error, error_code: string | null = null, result: any = null): Response => {
@@ -122,6 +123,10 @@ const getDate = (): string => {
     return `${day}/${month}/${year}`;
 };
 
+const isValidProduct = (p: ProductData | null): p is ProductData =>
+    p !== null
+  
+
 const sortedProduct = async (rest: ProductData[], limit: number): Promise<ProductData[] | Error> => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -133,7 +138,7 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                     cached.map((product) =>
                         new Promise<ProductData | null>((resolve) => {
                             db.getProduct(product.product_id, "approved", false, (rest: any, err: Error) => {
-                                if (err || !rest) return resolve(null);
+                                if (err || !rest || rest.is_disabled === true) return resolve(null);
                                 db.getUserData(rest.seller.seller_id, (rests: any, err: Error) => {
                                     if (err || !rests) return resolve(null);
                                     resolve(productInject(product, rests.name));
@@ -142,7 +147,7 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                         })
                     )
                 )
-            ).filter((product) => product !== null) as ProductData[];
+            ).filter(isValidProduct)
             const missingCount = limit - validProducts.length;
 
             if (missingCount > 0) {
@@ -162,7 +167,7 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                     )
                 );
 
-                const updatedProducts = [...validProducts, ...news.filter((p) => p !== null)] as ProductData[];
+                const updatedProducts = [...validProducts, ...news.filter(isValidProduct)]
                 await redClient.setex("summary", Number(process.env.REDIS_TTL), JSON.stringify(updatedProducts));
 
                 return resolve(updatedProducts);
