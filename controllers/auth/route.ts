@@ -12,6 +12,8 @@ interface AuthSignupRequest extends Request {
         instance?: Instance;
         whatsapp?: string;
         password: string;
+        asal_sekolah: string;
+        jurusan: string;
     }
 }
 
@@ -31,26 +33,37 @@ interface AuthSignoutRequest extends Request {
 /**
  * Endpoint untuk mendaftarkan pengguna baru.
  */
-export const authSignup = (req: AuthSignupRequest, res: Response): Response | void => {
-    const { name, email, instance, whatsapp, password } = req.body;
+export const authSignup = async (req: AuthSignupRequest, res: Response): Promise<void> => {
+    const { name, email, instance, whatsapp, password, asal_sekolah, jurusan } = req.body;
+    const file = (req as any).file;
+
     if (!helper.detectParam(name, email, password)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `name, email, password`), errors[400]['400.parameter'].code);
     }
 
-    db.addUser(name, instance, whatsapp, email, password, null, (result: any, err: Error) => {
-        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
-        if (!result) return helper.response(res, 400, false, errors[400]['400.available'].message, errors[400]['400.available'].code);
+    const uploadResult: any = await new Promise((resolve, reject) => {
+        db.addToDrive(file, null, 'profile', (result: any, err: Error) => {
+            if (err) return reject(helper.response(res, 400, false, err, errors[400]['400.error'].code));
+            resolve(result);
+        });
+    });
 
-        const accessToken = helper.generateKey({ id: result });
-        db.saveAccessToken(accessToken, result);
-        return helper.response(res, 200, true, `Berhasil!`, null, { access_token: accessToken });
+    await new Promise<void>((resolve, reject) => {
+        db.addUser(name, instance, whatsapp, email, password, `${process.env.GOOGLE_DRIVE_URL}${uploadResult.file_id}`, asal_sekolah, jurusan, (result: any, err: Error) => {
+            if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+            if (!result) return helper.response(res, 400, false, errors[400]['400.available'].message, errors[400]['400.available'].code);
+    
+            const accessToken = helper.generateKey({ id: result });
+            db.saveAccessToken(accessToken, result);
+            return helper.response(res, 200, true, `Berhasil!`, null, { access_token: accessToken });
+        });
     });
 };
 
 /**
  * Endpoint untuk login pengguna.
  */
-export const authSignin = (req: AuthSigninRequest, res: Response): Response | void => {
+export const authSignin = (req: AuthSigninRequest, res: Response): void => {
     const { email, password } = req.body;
     if (!helper.detectParam(email, password)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `email, password`), errors[400]['400.parameter'].code);
@@ -74,7 +87,7 @@ export const authSignin = (req: AuthSigninRequest, res: Response): Response | vo
 /**
  * Endpoint untuk menghapus token akses.
  */
-export const authSignout = (req: AuthSignoutRequest, res: Response): Response | void => {
+export const authSignout = (req: AuthSignoutRequest, res: Response): void => {
     const { access_token } = req.body;
     if (!helper.detectParam(access_token)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `access_token`), errors[400]['400.parameter'].code);

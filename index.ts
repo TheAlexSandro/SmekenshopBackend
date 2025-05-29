@@ -9,11 +9,11 @@ import { verifyToken, verifyProduct, verifyAccount } from "./controllers/verify/
 
 const port: number = Number(process.env.PORT) || 3000;
 const memo: multer.StorageEngine = multer.memoryStorage();
-const uploads = multer({ storage: memo });
+const uploads = multer({ storage: memo, limits: { fileSize: 20000000 } });
 
 app.post("/account/update", uploads.single("file"), updateAccount);
 app.post("/account/role", updateRole);
-app.post("/auth/signup", authSignup);
+app.post("/auth/signup", uploads.single("file"), authSignup);
 app.post("/auth/signin", authSignin);
 app.post("/auth/signout", authSignout);
 app.post("/product/list", getProductList);

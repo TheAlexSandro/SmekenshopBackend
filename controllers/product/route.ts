@@ -74,7 +74,7 @@ interface ProductSearchRequest extends Request {
 /**
  * Endpoint untuk mendapatkan daftar produk berdasarkan status.
  */
-export const getProductList = (req: ProductListRequest, res: Response): Response | void => {
+export const getProductList = (req: ProductListRequest, res: Response): void => {
     const { status, seller_id } = req.body;
     if (!helper.detectParam(status)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace('{PARAMETER}', 'status'), errors[400]['400.parameter'].code);
@@ -107,7 +107,7 @@ export const getProductList = (req: ProductListRequest, res: Response): Response
     });
 };
 
-export const productReview = (req: ProductReviewRequest, res: Response): Response | void => {
+export const productReview = (req: ProductReviewRequest, res: Response): void => {
     const { product_id, status, action, message } = req.body;
     if (!helper.detectParam(product_id, action)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace('{PARAMETER}', 'product_id, action'), errors[400]['400.parameter'].code);
@@ -203,7 +203,7 @@ export const productUpload = (req: ProductUploadRequest, res: Response) => {
 /**
  * Endpoint untuk mengupdate produk.
  */
-export const productUpdate = async (req: ProductUpdateRequest, res: Response): Promise<Response | void> => {
+export const productUpdate = async (req: ProductUpdateRequest, res: Response): Promise<void> => {
     try {
         const { server_id, seller_id, product_id, status, data, action, old_file_id } = req.body;
         const files = (req as any).files;
@@ -391,7 +391,7 @@ export const productUpdate = async (req: ProductUpdateRequest, res: Response): P
     }
 };
 
-export const productRemove = (req: ProductRemoveRequest, res: Response): Response | void => {
+export const productRemove = (req: ProductRemoveRequest, res: Response): void => {
     const { seller_id, status, product_id }: { seller_id: string; status: string; product_id: string } = req.body;
 
     if (!helper.detectParam(seller_id, status, product_id)) {
@@ -436,7 +436,7 @@ export const productRemove = (req: ProductRemoveRequest, res: Response): Respons
 /**
  * Endpoint untuk mendapatkan ringkasan produk.
  */
-export const productSummary = (req: ProductSummaryRequest, res: Response): Response | void => {
+export const productSummary = (req: ProductSummaryRequest, res: Response): void => {
     const { limit } = req.body;
 
     if ((limit && String(limit) === '' )|| (limit && limit < 0)) {
@@ -459,7 +459,7 @@ export const productSummary = (req: ProductSummaryRequest, res: Response): Respo
 /**
  * Endpoint untuk mencari produk.
  */
-export const productSearch = (req: ProductSearchRequest, res: Response): Response | void => {
+export const productSearch = (req: ProductSearchRequest, res: Response): void => {
     const { query, category } = req.body;
     if (query && query === '') {
         return helper.response(res, 400, false, `Jika Anda menggunakan query, maka query tidak boleh kosong.`, errors[400]['400.error'].code);

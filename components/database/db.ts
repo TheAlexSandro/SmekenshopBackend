@@ -32,7 +32,9 @@ const usersSchema = new mongoose.Schema({
         total_like: String,
         total_interaction: String,
     },
-    is_still_seller: { type: Boolean, default: true }
+    is_still_seller: { type: Boolean, default: true },
+    asal_sekolah: { type: String, default: "-" },
+    juruan: { type: String, default: "-" }
 });
 
 const productsSchema = new mongoose.Schema({
@@ -80,6 +82,8 @@ interface UserData extends Document {
         total_interaction: string,
     },
     is_still_seller: boolean;
+    asal_sekolah: string;
+    jurusan: string;
 }
 
 interface ProductData extends Document {
@@ -126,7 +130,7 @@ interface FileObject {
 type DriveCallback = (result: { file_id: string; file_name: string } | null, error?: Error) => void;
 type UserCallback<T> = (result: T, error?: Error) => void;
 
-const addUser = (name: string, instance: string | null = null, whatsapp: string | null = null, email: string, password: string, profile_photo: string | null, callback: UserCallback<string | false | null | Error>): void => {
+const addUser = (name: string, instance: string | null = null, whatsapp: string | null = null, email: string, password: string, profile_photo: string | null, asal_sekolah: string, jurusan: string, callback: UserCallback<string | false | null | Error>): void => {
     const profile = profile_photo || null;
 
     getUserData(email, (result: UserData | null, err?: Error) => {
@@ -152,6 +156,8 @@ const addUser = (name: string, instance: string | null = null, whatsapp: string 
                         total_like: "0",
                         total_interaction: "0",
                     },
+                    asal_sekolah,
+                    jurusan
                 });
 
                 userData.save()

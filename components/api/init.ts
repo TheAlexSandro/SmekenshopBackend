@@ -23,20 +23,21 @@ app.use((req: Request, res: Response, next: NextFunction) => {
   next();
 })
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true, limit: '20mb' }));
+app.use(bodyParser.json({ limit: '20kb' }));
 app.use(express.static(publicFolder));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   if (res.statusCode === 403) {
-    return helper.response(res, 403, false, errors[403]["403.cors"].message, errors[403]["403.cors"].code);
+    helper.response(res, 403, false, errors[403]["403.cors"].message, errors[403]["403.cors"].code);
+    return;
   }
   next();
 });
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if (['PUT', 'DELETE', 'OPTIONS'].includes(req.method)) return helper.response(res, 403, false, errors[403]["403.method"].message, errors[403]["403.method"].code);
-  if (req.method === "GET") return res.sendFile(path.join(publicFolder, "index.html"));
+  if (['PUT', 'DELETE', 'OPTIONS'].includes(req.method)) { helper.response(res, 403, false, errors[403]["403.method"].message, errors[403]["403.method"].code); return; }
+  if (req.method === "GET") { res.sendFile(path.join(publicFolder, "index.html")); return; }
   next();
 });
 

@@ -26,7 +26,7 @@ interface UpdateRoleRequest extends Request {
 /**
  * Endpoint untuk mengupdate data pengguna.
  */
-export const updateAccount = async (req: UpdateAccountRequest, res: Response): Promise<Response | void> => {
+export const updateAccount = async (req: UpdateAccountRequest, res: Response): Promise<void> => {
     const { server_id, id, email, data, action } = req.body;
     const files = (req as any).file;
 
@@ -157,7 +157,7 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
 /**
  * Endpoint untuk mengupdate peran pengguna.
  */
-export const updateRole = (req: UpdateRoleRequest, res: Response): Response | void => {
+export const updateRole = (req: UpdateRoleRequest, res: Response): void => {
     const { id, role } = req.body;
 
     if (!helper.detectParam(id, role)) {

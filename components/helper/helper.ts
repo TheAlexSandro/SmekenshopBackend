@@ -35,12 +35,12 @@ interface ProductData {
     is_disabled: boolean;
 }
 
-const response = (res: Response, status_code: number, ok: boolean, message: string | Error, error_code: string | null = null, result: any = null): Response => {
+const response = (res: Response, status_code: number, ok: boolean, message: string | Error, error_code: string | null = null, result: any = null): void => {
     let msg = message;
     if (status_code === 400) {
         msg = message instanceof Error ? message.message : message;
     }
-    return res.status(status_code).json(
+    res.status(status_code).json(
         cleanJSON({
             ok,
             status_code,
@@ -49,6 +49,7 @@ const response = (res: Response, status_code: number, ok: boolean, message: stri
             result,
         })
     );
+    return;
 };
 
 const detectParam = (...params: any[]): boolean => {

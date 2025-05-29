@@ -33,7 +33,7 @@ interface VerifyAccountRequest extends Request {
 /**
  * Endpoint untuk memverifikasi token akses dan mendapatkan informasi pengguna.
  */
-export const verifyToken = (req: VerifyTokenRequest, res: Response): Response | void => {
+export const verifyToken = (req: VerifyTokenRequest, res: Response): void => {
     const { access_token }: { access_token?: string } = req.body;
     
     if (!access_token || !helper.detectParam(access_token)) {
@@ -74,7 +74,7 @@ export const verifyToken = (req: VerifyTokenRequest, res: Response): Response | 
 /**
  * Endpoint untuk memverifikasi produk.
  */
-export const verifyProduct = (req: VerifyProductRequest, res: Response): Response | void => {
+export const verifyProduct = (req: VerifyProductRequest, res: Response): void => {
     const { product_id, seller_id, email, status } = req.body;
 
     if (!helper.detectParam(product_id)) {
@@ -132,7 +132,7 @@ export const verifyProduct = (req: VerifyProductRequest, res: Response): Respons
 /**
  * Endpoint untuk mendapatkan informasi akun (tanpa field password).
  */
-export const verifyAccount = (req: VerifyAccountRequest, res: Response): Response | void => {
+export const verifyAccount = (req: VerifyAccountRequest, res: Response): void => {
     const { account_id, email }: { account_id?: string; email?: string } = req.body;
 
     if ((!account_id || account_id === '') && (!email || email === '')) {
