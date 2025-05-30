@@ -195,6 +195,6 @@ export const accountList = (req: AccountListRequest, res: Response): void => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!result) return helper.response(res, 404, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
 
-        return helper.response(res, 200, true, `Berhasil`, null, { result });
+        return helper.response(res, 200, true, `Berhasil`, null, result);
     })
 }
