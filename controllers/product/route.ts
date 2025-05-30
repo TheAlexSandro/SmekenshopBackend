@@ -113,8 +113,8 @@ export const productReview = (req: ProductReviewRequest, res: Response): void =>
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace('{PARAMETER}', 'product_id, action'), errors[400]['400.parameter'].code);
     }
 
-    if (!['approve', 'reject'].includes(action)) {
-        return helper.response(res, 400, false, 'Parameter action hanya bisa "approve" atau "reject".', errors[400]['400.error'].code);
+    if (!['approve', 'reject', 'drop'].includes(action)) {
+        return helper.response(res, 400, false, 'Parameter action hanya bisa "approve", "reject" dan "drop".', errors[400]['400.error'].code);
     }
 
     if (message && message === '') {
