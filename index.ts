@@ -2,7 +2,7 @@ import "dotenv/config";
 import app from "./components/api/init";
 import multer from "multer";
 
-import { updateAccount, updateRole } from "./controllers/account/route";
+import { updateAccount, updateRole, accountList } from "./controllers/account/route";
 import { authSignup, authSignin, authSignout } from "./controllers/auth/route";
 import { getProductList, productReview, productUpload, productUpdate,  productRemove, productSummary, productSearch } from "./controllers/product/route";
 import { verifyToken, verifyProduct, verifyAccount } from "./controllers/verify/route";
@@ -13,6 +13,7 @@ const uploads = multer({ storage: memo, limits: { fileSize: 20000000 } });
 
 app.post("/account/update", uploads.single("file"), updateAccount);
 app.post("/account/role", updateRole);
+app.post("/account/list", accountList)
 app.post("/auth/signup", uploads.single("file"), authSignup);
 app.post("/auth/signin", authSignin);
 app.post("/auth/signout", authSignout);

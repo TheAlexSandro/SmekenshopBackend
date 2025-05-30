@@ -186,6 +186,20 @@ const getUserData = (ident: string, callback: UserCallback<UserData | false | nu
         });
 };
 
+const getUserList = (role: string, callback: UserCallback<UserData | false | null | Error>): void => {
+    Users.findOne({ role })
+        .then((user) => {
+            if (user) {
+                callback(user.toObject() as UserData);
+            } else {
+                callback(false);
+            }
+        })
+        .catch((error: Error) => {
+            callback(null, error);
+        });
+};
+
 const updateUserData = (ident: string, action: "update" | "remove", value: any = null, field: string, callback: UserCallback<boolean | "not_found" | null | Error>): void => {
     if (action === "remove") {
         value = null;
@@ -515,6 +529,7 @@ const removeProduct = (seller_id: string, status: string, product_id: string, ca
 export {
     addUser,
     getUserData,
+    getUserList,
     saveAccessToken,
     getAccessToken,
     removeAccessToken,

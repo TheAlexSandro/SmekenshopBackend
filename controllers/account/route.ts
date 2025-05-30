@@ -23,6 +23,12 @@ interface UpdateRoleRequest extends Request {
     }
 }
 
+interface AccountListRequest extends Request {
+    body: {
+        role?: string;
+    }
+}
+
 /**
  * Endpoint untuk mengupdate data pengguna.
  */
@@ -174,4 +180,21 @@ export const updateRole = (req: UpdateRoleRequest, res: Response): void => {
 
         return helper.response(res, 200, true, `Berhasill mengganti peran pengguna ini ke ${role}!`, null, { id });
     });
+}
+
+/**
+ * Endpoint untuk mendapatkan daftar akun
+*/
+export const accountList = (req: AccountListRequest, res: Response): void => {
+    const { role } = req.body;
+    if (!helper.detectParam(role)) {
+        return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `role`), errors[400]['400.parameter'].code);
+    }
+
+    db.getUserList(role, (result: any, err: Error | null) => {
+        if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
+        if (!result) return helper.response(res, 404, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
+
+        return helper.response(res, 200, true, `Berhasil`, null, { result });
+    })
 }
