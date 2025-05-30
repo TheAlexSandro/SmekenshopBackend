@@ -85,6 +85,7 @@ interface UserData extends Document {
     is_still_seller: boolean;
     asal_sekolah: string;
     jurusan: string;
+    message: string;
 }
 
 interface ProductData extends Document {
