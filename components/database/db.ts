@@ -224,18 +224,20 @@ const updateUserData = (ident: string, action: "update" | "remove", value: any =
             return callback("not_found");
         }
 
+        let updateFields: any = {};
+
         if (field == 'role') {
-            var kl = value.split('/]');
-            var msg = kl[1];
-            var values = kl[0];
-            Users.updateOne({ id: rest.id }, { $set: { message: msg } })
+            const [values, msg] = value.split('/]');
+            updateFields['role'] = values;
+            updateFields['message'] = msg;
         } else {
-            var values = value
+            updateFields[field] = value;
         }
 
-        Users.updateOne({ id: rest.id }, { $set: { [field]: values } })
+        Users.updateOne({ id: rest.id }, { $set: updateFields })
             .then(() => callback(true))
             .catch((error: Error) => callback(null, error));
+
     });
 };
 
@@ -370,7 +372,7 @@ const addProduct = (product_id: string | null = null, product_name: string, desc
 
 const reviewProduct = (product_id: string, product_name: string, description: string, price: string | number, category: string, images: string[], seller_id: string, like: number, view: number, interaction: number, release_date: string, action: "approve" | "reject" | "drop", message: string | null = null, stock: string, callback: UserCallback<boolean>): void => {
     const status = (action === "approve") ? 'approved' : (action === "reject") ? 'rejected' : 'dropped';
-    const m = (action === "approve") ? null : message; 
+    const m = (action === "approve") ? null : message;
     const fileData = {
         status,
         product_id,
@@ -459,14 +461,14 @@ const updateProduct = async (product_id: string, status: string, value: any, fie
             if (!Object.prototype.hasOwnProperty.call(product, field)) {
                 if (callback) return callback("not_found");
             }
-    
+
             if (field === "images") {
                 value = [];
             }
-    
+
             const model: mongoose.Model<Document> = status === "approved" ? Products : status === "rejected" ? Rejected : status === "dropped" ? Dropped : Pendings;
             const updated = await model.updateOne({ product_id }, { [field]: value });
-    
+
             if (updated.modifiedCount > 0) {
                 if (callback) return callback(product_id);
             } else {
@@ -496,7 +498,7 @@ const updateProductImage = async (product_id: string, status: string, action: "u
                         "images.$.file_name": newFileName
                     }
                 }
-            );        
+            );
         } else if (action === "add") {
             updated = await model.updateOne(
                 { product_id },
