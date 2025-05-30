@@ -175,7 +175,6 @@ export const updateRole = (req: UpdateRoleRequest, res: Response): void => {
         return helper.response(res, 400, false, 'Parameter role hanya bisa "admin", "user", atau "banned".', errors[400]['400.error'].code);
     }
 
-    console.log(message);
     if (role == 'banned') {
         var vs = `${role}/]${message}`
     } else {

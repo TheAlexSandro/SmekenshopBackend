@@ -397,18 +397,23 @@ const reviewProduct = (product_id: string, product_name: string, description: st
 
         Rejected.deleteOne({ product_id }).exec();
         Pendings.deleteOne({ product_id }).exec();
+        Dropped.deleteOne({ product_id }).exec();
     } else if (action === "reject") {
         Rejected.create(fileData)
             .then(() => callback(true))
             .catch((e) => callback(null, e));
 
+        Products.deleteOne({ product_id }).exec();
         Pendings.deleteOne({ product_id }).exec();
+        Dropped.deleteOne({ product_id }).exec();
     } else if (action === "drop") {
         Dropped.create(fileData)
             .then(() => callback(true))
             .catch((e) => callback(null, e));
 
         Products.deleteOne({ product_id }).exec();
+        Pendings.deleteOne({ product_id }).exec();
+        Rejected.deleteOne({ product_id }).exec();
     }
 };
 
