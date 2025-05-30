@@ -34,7 +34,7 @@ const usersSchema = new mongoose.Schema({
     },
     is_still_seller: { type: Boolean, default: true },
     asal_sekolah: { type: String, default: "-" },
-    juruan: { type: String, default: "-" }
+    jurusan: { type: String, default: "-" }
 });
 
 const productsSchema = new mongoose.Schema({
