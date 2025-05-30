@@ -141,7 +141,7 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                             db.getProduct(product.product_id, "approved", false, (rest: any, err: Error) => {
                                 if (err || !rest || rest.is_disabled === true) return resolve(null);
                                 db.getUserData(rest.seller.seller_id, (rests: any, err: Error) => {
-                                    if (err || !rests) return resolve(null);
+                                    if (err || !rests || rests.role == 'banned') return resolve(null);
                                     resolve(productInject(product, rests.name));
                                 });
                             });
@@ -161,7 +161,7 @@ const sortedProduct = async (rest: ProductData[], limit: number): Promise<Produc
                         (product) =>
                             new Promise<ProductData | null>((resolve) => {
                                 db.getUserData(product.seller.seller_id, (rests: any, err: Error) => {
-                                    if (err || !rests) return resolve(null);
+                                    if (err || !rests || rests.role == 'banned') return resolve(null);
                                     resolve(productInject(product, rests.name));
                                 });
                             })

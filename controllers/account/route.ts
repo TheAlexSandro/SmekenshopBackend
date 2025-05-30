@@ -20,6 +20,7 @@ interface UpdateRoleRequest extends Request {
     body: {
         id: string;
         role: Role;
+        message?: string;
     }
 }
 
@@ -164,7 +165,7 @@ export const updateAccount = async (req: UpdateAccountRequest, res: Response): P
  * Endpoint untuk mengupdate peran pengguna.
  */
 export const updateRole = (req: UpdateRoleRequest, res: Response): void => {
-    const { id, role } = req.body;
+    const { id, role, message } = req.body;
 
     if (!helper.detectParam(id, role)) {
         return helper.response(res, 400, false, errors[400]['400.parameter'].message.replace(`{PARAMETER}`, `id, role`), errors[400]['400.parameter'].code);
@@ -174,7 +175,13 @@ export const updateRole = (req: UpdateRoleRequest, res: Response): void => {
         return helper.response(res, 400, false, 'Parameter role hanya bisa "admin", "user", atau "banned".', errors[400]['400.error'].code);
     }
 
-    db.updateUserData(id, 'update', role, 'role', (result: any, err: Error) => {
+    if (role == 'banned') {
+        var vs = `${role}/]${message}`
+    } else {
+        var vs = role as string;
+    }
+
+    db.updateUserData(id, 'update', vs, 'role', (result: any, err: Error) => {
         if (err) return helper.response(res, 400, false, err, errors[400]['400.error'].code);
         if (!result) return helper.response(res, 404, false, errors[404]['404.user'].message, errors[404]['404.user'].code);
 

@@ -34,7 +34,8 @@ const usersSchema = new mongoose.Schema({
     },
     is_still_seller: { type: Boolean, default: true },
     asal_sekolah: { type: String, default: "-" },
-    jurusan: { type: String, default: "-" }
+    jurusan: { type: String, default: "-" },
+    message: { type: String, default: "-" }
 });
 
 const productsSchema = new mongoose.Schema({
@@ -222,7 +223,16 @@ const updateUserData = (ident: string, action: "update" | "remove", value: any =
             return callback("not_found");
         }
 
-        Users.updateOne({ id: rest.id }, { $set: { [field]: value } })
+        if (field == 'role') {
+            var kl = value.split('/]');
+            var msg = kl[1];
+            var values = kl[0];
+            Users.updateOne({ id: rest.id }, { $set: { message: msg } })
+        } else {
+            var values = value
+        }
+
+        Users.updateOne({ id: rest.id }, { $set: { [field]: values } })
             .then(() => callback(true))
             .catch((error: Error) => callback(null, error));
     });
