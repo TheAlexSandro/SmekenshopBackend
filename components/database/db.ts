@@ -186,11 +186,11 @@ const getUserData = (ident: string, callback: UserCallback<UserData | false | nu
         });
 };
 
-const getUserList = (role: string, callback: UserCallback<UserData | false | null | Error>): void => {
-    Users.findOne({ role })
+const getUserList = (role: string, callback: UserCallback<any>): void => {
+    Users.find({ role })
         .then((user) => {
             if (user) {
-                callback(user.toObject() as UserData);
+                callback(user);
             } else {
                 callback(false);
             }
